@@ -1,0 +1,50 @@
+{
+  "task_name": "task1",
+  "accuracy": 0.7864,
+  "train_samples": 40000,
+  "validation_samples": 10000,
+  "feature_count": 6,
+  "target_distribution_train": {
+    "High": 23736,
+    "Medium": 9662,
+    "Low": 6602
+  },
+  "target_distribution_validation": {
+    "High": 5934,
+    "Medium": 2416,
+    "Low": 1650
+  },
+  "classification_report": {
+    "Low": {
+      "precision": 0.7114228456913828,
+      "recall": 0.6454545454545455,
+      "f1-score": 0.6768350810295519,
+      "support": 1650.0
+    },
+    "Medium": {
+      "precision": 0.5637080867850098,
+      "recall": 0.5914735099337748,
+      "f1-score": 0.577257119773783,
+      "support": 2416.0
+    },
+    "High": {
+      "precision": 0.899798927613941,
+      "recall": 0.9049544994944388,
+      "f1-score": 0.9023693496891279,
+      "support": 5934.0
+    },
+    "accuracy": 0.7864,
+    "macro avg": {
+      "precision": 0.7249766200301112,
+      "recall": 0.7139608516275864,
+      "f1-score": 0.7188205168308208,
+      "support": 10000.0
+    },
+    "weighted avg": {
+      "precision": 0.7875173269524491,
+      "recall": 0.7864,
+      "f1-score": 0.7866090806127505,
+      "support": 10000.0
+    }
+  }
+}
