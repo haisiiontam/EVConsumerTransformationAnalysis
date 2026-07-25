@@ -1,22 +1,30 @@
-"""主程序：电动汽车消费者转型分析三任务朴素基线。"""
+"""主程序：电动汽车消费者转型分析三任务入口。"""
 
 from __future__ import annotations
 
 import argparse
 import logging
-import sys
 from pathlib import Path
+from typing import Dict, Optional
 
 import pandas as pd
 
-from src.config import DEFAULT_TEST_SIZE, SCORE_WEIGHTS
-from src.data_utils import (
+from src.common.data_utils import (
     check_required_columns,
     ensure_output_dirs,
     read_csv_compatible,
     save_data_checks,
 )
-from src.modeling import run_all_tasks
+from src.config import (
+    DEFAULT_TEST_SIZE,
+    SCORE_WEIGHTS,
+    TASK2_ALPHA_STEP,
+    TASK2_N_FOLDS,
+    TASK2_THRESHOLD_MAX,
+    TASK2_THRESHOLD_MIN,
+    TASK2_THRESHOLD_STEP,
+)
+from src.tasks import task1, task2, task3
 
 
 def setup_logging() -> None:
@@ -31,34 +39,39 @@ def setup_logging() -> None:
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """解析命令行参数。"""
     parser = argparse.ArgumentParser(
-        description="电动汽车消费者转型分析三任务朴素基线（CatBoost）",
+        description="电动汽车消费者转型分析（任务一/三基线 + 任务二优化）",
     )
-    parser.add_argument(
-        "--data",
-        type=str,
-        required=True,
-        help="原始 CSV 文件路径（必填）",
-    )
-    parser.add_argument(
-        "--output",
-        type=str,
-        default="outputs",
-        help="输出目录（默认 outputs）",
-    )
+    parser.add_argument("--data", type=str, required=True, help="有标签 CSV 路径（必填）")
+    parser.add_argument("--output", type=str, default="outputs", help="输出目录（默认 outputs）")
     parser.add_argument(
         "--test-size",
         type=float,
         default=DEFAULT_TEST_SIZE,
-        help="验证集比例（默认 0.2）",
+        help="最终验证集比例（默认 0.2）",
     )
+    parser.add_argument(
+        "--task",
+        type=str,
+        default="all",
+        choices=["all", "task1", "task2", "task3"],
+        help="运行任务：all / task1 / task2 / task3",
+    )
+    parser.add_argument(
+        "--test",
+        type=str,
+        default=None,
+        help="可选独立测试集 CSV（仅任务二在最终验证后预测）",
+    )
+    parser.add_argument("--task2-folds", type=int, default=TASK2_N_FOLDS)
+    parser.add_argument("--task2-alpha-step", type=float, default=TASK2_ALPHA_STEP)
+    parser.add_argument("--task2-threshold-min", type=float, default=TASK2_THRESHOLD_MIN)
+    parser.add_argument("--task2-threshold-max", type=float, default=TASK2_THRESHOLD_MAX)
+    parser.add_argument("--task2-threshold-step", type=float, default=TASK2_THRESHOLD_STEP)
     return parser.parse_args(argv)
 
 
 def compute_weighted_score(acc1: float, acc2: float, acc3: float) -> float:
-    """
-    计算内部验证加权分：
-    weighted_score = 100 * (0.2 * ACC1 + 0.4 * ACC2 + 0.4 * ACC3)
-    """
+    """内部验证加权分（非最终比赛成绩）。"""
     return 100.0 * (
         SCORE_WEIGHTS["ACC1"] * acc1
         + SCORE_WEIGHTS["ACC2"] * acc2
@@ -67,31 +80,39 @@ def compute_weighted_score(acc1: float, acc2: float, acc3: float) -> float:
 
 
 def save_overall_summary(
-    accuracies: dict[str, float],
+    accuracies: Dict[str, Optional[float]],
     output_dir: Path,
-) -> float:
-    """保存 overall_summary.csv，并返回 validation weighted score。"""
-    weighted = compute_weighted_score(
-        accuracies["ACC1"],
-        accuracies["ACC2"],
-        accuracies["ACC3"],
+) -> Optional[float]:
+    """保存 overall_summary.csv。"""
+    rows = []
+    for key in ("ACC1", "ACC2", "ACC3"):
+        rows.append({"metric": key, "value": accuracies.get(key)})
+
+    weighted: Optional[float] = None
+    if all(accuracies.get(k) is not None for k in ("ACC1", "ACC2", "ACC3")):
+        weighted = compute_weighted_score(
+            float(accuracies["ACC1"]),
+            float(accuracies["ACC2"]),
+            float(accuracies["ACC3"]),
+        )
+        rows.append({"metric": "weighted_score", "value": weighted})
+        rows.append({"metric": "score_note", "value": "validation weighted score"})
+    else:
+        rows.append(
+            {
+                "metric": "score_note",
+                "value": "partial run; weighted_score not computed",
+            }
+        )
+
+    pd.DataFrame(rows).to_csv(
+        Path(output_dir) / "overall_summary.csv", index=False, encoding="utf-8-sig"
     )
-    summary = pd.DataFrame(
-        [
-            {"metric": "ACC1", "value": accuracies["ACC1"]},
-            {"metric": "ACC2", "value": accuracies["ACC2"]},
-            {"metric": "ACC3", "value": accuracies["ACC3"]},
-            {"metric": "weighted_score", "value": weighted},
-            {"metric": "score_note", "value": "validation weighted score"},
-        ]
-    )
-    out_path = Path(output_dir) / "overall_summary.csv"
-    summary.to_csv(out_path, index=False, encoding="utf-8-sig")
     return weighted
 
 
 def main(argv: list[str] | None = None) -> int:
-    """串联数据检查与三个任务训练，输出内部验证总成绩。"""
+    """参数解析、调用所选任务并汇总成绩。"""
     setup_logging()
     logger = logging.getLogger("main")
     args = parse_args(argv)
@@ -101,35 +122,57 @@ def main(argv: list[str] | None = None) -> int:
 
     data_path = Path(args.data)
     output_dir = Path(args.output)
-
     logger.info("数据路径：%s", data_path)
     logger.info("输出目录：%s", output_dir)
-    logger.info("验证集比例 test_size=%.4f", args.test_size)
+    logger.info("运行任务：%s", args.task)
 
-    # 1. 准备输出目录
     output_dirs = ensure_output_dirs(output_dir)
-
-    # 2. 读取数据
     df = read_csv_compatible(data_path)
-
-    # 3. 必需字段检查
     check_required_columns(df)
-
-    # 4. 数据基础检查并保存
     save_data_checks(df, output_dirs["root"])
 
-    # 5. 依次训练三个任务
-    accuracies = run_all_tasks(df, output_dirs, test_size=args.test_size)
+    test_df = None
+    if args.test:
+        test_df = read_csv_compatible(Path(args.test))
+        logger.info("已读取独立测试集：%s，行数=%d", args.test, len(test_df))
 
-    # 6. 汇总内部验证加权分（非最终比赛成绩）
+    accuracies: Dict[str, Optional[float]] = {
+        "ACC1": None,
+        "ACC2": None,
+        "ACC3": None,
+    }
+
+    if args.task in ("all", "task1"):
+        m1 = task1.run(df, output_dirs["task1"], test_size=args.test_size)
+        accuracies["ACC1"] = float(m1["accuracy"])
+
+    if args.task in ("all", "task2"):
+        m2 = task2.run(
+            df,
+            output_dirs["task2"],
+            test_size=args.test_size,
+            n_folds=args.task2_folds,
+            alpha_step=args.task2_alpha_step,
+            threshold_min=args.task2_threshold_min,
+            threshold_max=args.task2_threshold_max,
+            threshold_step=args.task2_threshold_step,
+            test_df=test_df,
+        )
+        accuracies["ACC2"] = float(m2["accuracy"])
+
+    if args.task in ("all", "task3"):
+        m3 = task3.run(df, output_dirs["task3"], test_size=args.test_size)
+        accuracies["ACC3"] = float(m3["accuracy"])
+
     weighted = save_overall_summary(accuracies, output_dirs["root"])
 
     logger.info("=" * 60)
     logger.info("内部验证结果（validation only，非最终比赛成绩）")
-    logger.info("ACC1 = %.6f", accuracies["ACC1"])
-    logger.info("ACC2 = %.6f", accuracies["ACC2"])
-    logger.info("ACC3 = %.6f", accuracies["ACC3"])
-    logger.info("validation weighted score = %.4f", weighted)
+    for key, val in accuracies.items():
+        if val is not None:
+            logger.info("%s = %.6f", key, val)
+    if weighted is not None:
+        logger.info("validation weighted score = %.4f", weighted)
     logger.info("全部输出已写入：%s", output_dir.resolve())
     return 0
 

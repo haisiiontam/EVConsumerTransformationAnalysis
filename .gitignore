@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+.venv/
+venv/
+.env
+
+# 运行产出（可本地复现，不入库）
+outputs/
+*.log
+*.cbm
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

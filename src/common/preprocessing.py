@@ -15,14 +15,12 @@ logger = logging.getLogger(__name__)
 def identify_feature_types(
     df: pd.DataFrame,
     feature_cols: Sequence[str],
+    known_categorical: Sequence[str] | None = None,
 ) -> Tuple[List[str], List[str]]:
-    """
-    识别数值特征与类别特征。
-
-    同时结合：
-    1. 题目明确的类别特征列表；
-    2. pandas 实际 dtype（object / category / bool 视为类别）。
-    """
+    """识别数值特征与类别特征。"""
+    known = set(known_categorical) if known_categorical is not None else set(
+        KNOWN_CATEGORICAL_FEATURES
+    )
     categorical: List[str] = []
     numerical: List[str] = []
 
@@ -31,8 +29,7 @@ def identify_feature_types(
             raise KeyError(f"特征列不存在：{col}")
 
         dtype = df[col].dtype
-        is_known_cat = col in KNOWN_CATEGORICAL_FEATURES
-        # 兼容不同 pandas 版本的 category / object 识别
+        is_known_cat = col in known
         is_object_like = pd.api.types.is_object_dtype(dtype) or isinstance(
             dtype, pd.CategoricalDtype
         )
@@ -57,19 +54,12 @@ def fit_preprocess_stats(
     numerical_cols: Sequence[str],
     categorical_cols: Sequence[str],
 ) -> Dict[str, float]:
-    """
-    仅根据训练集计算数值特征中位数，避免数据泄露。
-
-    返回：{列名: 中位数}
-    """
+    """仅根据训练集计算数值特征中位数，避免数据泄露。"""
     medians: Dict[str, float] = {}
     for col in numerical_cols:
         series = pd.to_numeric(X_train[col], errors="coerce")
         median_value = float(series.median()) if series.notna().any() else 0.0
         medians[col] = median_value
-        logger.info("训练集数值特征中位数：%s = %s", col, median_value)
-
-    # categorical_cols 参数保留，便于接口统一；类别填充规则固定为 Unknown
     _ = categorical_cols
     return medians
 
@@ -80,12 +70,7 @@ def transform_features(
     categorical_cols: Sequence[str],
     medians: Dict[str, float],
 ) -> pd.DataFrame:
-    """
-    使用训练集统计量对特征做变换。
-
-    数值：to_numeric + 训练集中位数填补；不做标准化/异常值删除/对数变换。
-    类别：转字符串、去空格、缺失填 Unknown。
-    """
+    """使用训练集统计量对特征做变换。"""
     X_out = X.copy()
 
     for col in numerical_cols:
@@ -94,12 +79,10 @@ def transform_features(
         X_out[col] = X_out[col].fillna(fill_value)
 
     for col in categorical_cols:
-        # 先保留缺失，再统一填充，避免把 NaN 变成字符串 "nan"
         mask_missing = X_out[col].isna()
         as_str = X_out[col].astype(str).str.strip()
         as_str = as_str.replace({"nan": "Unknown", "None": "Unknown", "<NA>": "Unknown"})
         as_str = as_str.where(~mask_missing, "Unknown")
-        # 空字符串也视为未知
         as_str = as_str.replace({"": "Unknown"})
         X_out[col] = as_str
 
@@ -112,9 +95,7 @@ def get_cat_feature_indices(
 ) -> List[int]:
     """生成 CatBoost 所需的类别特征列索引。"""
     cat_set = set(categorical_cols)
-    indices = [i for i, col in enumerate(feature_cols) if col in cat_set]
-    logger.info("CatBoost 类别特征索引：%s", indices)
-    return indices
+    return [i for i, col in enumerate(feature_cols) if col in cat_set]
 
 
 def prepare_xy(
@@ -122,18 +103,13 @@ def prepare_xy(
     X_valid: pd.DataFrame,
     feature_cols: Sequence[str],
 ) -> Tuple[pd.DataFrame, pd.DataFrame, List[str], List[str], List[int]]:
-    """
-    完整预处理流水线：识别类型 -> 拟合训练集统计量 -> 变换 train/valid。
-
-    返回处理后的 X_train、X_valid、数值列、类别列、类别索引。
-    """
+    """完整预处理流水线：识别类型 -> 拟合训练集统计量 -> 变换 train/valid。"""
     numerical_cols, categorical_cols = identify_feature_types(X_train, feature_cols)
     medians = fit_preprocess_stats(X_train, numerical_cols, categorical_cols)
 
     X_train_p = transform_features(X_train, numerical_cols, categorical_cols, medians)
     X_valid_p = transform_features(X_valid, numerical_cols, categorical_cols, medians)
 
-    # 保证列顺序与官方特征列表一致
     X_train_p = X_train_p.loc[:, list(feature_cols)]
     X_valid_p = X_valid_p.loc[:, list(feature_cols)]
 

@@ -1,4 +1,4 @@
-# 电动汽车消费者转型分析 · 三任务朴素基线
+# 电动汽车消费者转型分析 · 三任务基线 + 任务二优化
 
 ## 1. 项目目的
 
@@ -6,17 +6,16 @@
 
 > 从燃油到纯电——电动汽车消费者转型分析
 
-目标是建立一套**结构清楚、无明显数据泄露、可完整运行**的朴素基线：三个分类任务分别用 CatBoost 训练，仅使用赛题建议特征，单次分层训练/验证划分，主指标为 Accuracy。
+- **任务一 / 任务三**：保留朴素基线（官方建议特征 + 单次分层划分 + 单一 CatBoost）
+- **任务二**：升级为诊断 + 安全扩展特征 + 机制特征 + OOF + 概率融合 + 阈值搜索，且**最终 20% 验证集不参与模型选择**
 
 ## 2. 三个任务定义
 
 | 任务 | 目标 | 类型 | 说明 |
 |------|------|------|------|
 | 任务一 | `ev_adoption_likelihood` | 三分类 Low / Medium / High | 电动汽车采用意愿 |
-| 任务二 | `home_charging_available` | 二分类 0 / 1 | 家庭充电条件预测（第一版按现有字段建模，不解释为「未来安装意愿」） |
-| 任务三 | 由 `range_anxiety_score` 构造 | 二分类：`> 5` → 1，`<= 5` → 0 | 里程焦虑敏感度；**不把该评分放入特征** |
-
-各任务官方建议特征见 `src/config.py`。
+| 任务二 | `home_charging_available` | 二分类 0 / 1 | 家庭充电条件（不是“未来安装意愿”） |
+| 任务三 | 由 `range_anxiety_score` 构造 | 二分类：`> 5` → 1，否则 0 | 里程焦虑敏感度；该评分不进特征 |
 
 ## 3. 环境安装
 
@@ -26,64 +25,172 @@
 pip install -r requirements.txt
 ```
 
-依赖：`pandas`、`numpy`、`scikit-learn`、`catboost`、`matplotlib`。
-
 ## 4. 数据字段要求
 
-CSV 至少包含以下字段（列名需与赛题英文列名一致，允许前后空格，程序会自动清理）：
+列名使用 snake_case。任务二官方基础字段必须存在：
 
-**任务一特征：** `annual_income`, `education_level`, `environmental_awareness_score`, `technology_affinity_score`, `range_anxiety_score`, `fuel_expense_per_month`  
-**任务一目标：** `ev_adoption_likelihood`
+`city_type`, `nearest_charging_station_km`, `education_level`, `annual_income`, `vehicle_age_years`, `home_charging_available`
 
-**任务二特征：** `city_type`, `nearest_charging_station_km`, `education_level`, `annual_income`, `vehicle_age_years`  
-**任务二目标：** `home_charging_available`
-
-**任务三特征：** `daily_commute_km`, `weekly_travel_distance_km`, `charging_station_accessibility`, `ev_knowledge_score`, `battery_replacement_concern`  
-**任务三评分源：** `range_anxiety_score`（仅用于构造标签，不作为任务三特征）
+任务一 / 任务三所需字段见 `src/config.py`。
 
 ## 5. 运行命令
 
 ```bash
-python main.py --data data/train.csv --output outputs
+# 三个任务全部运行
+python main.py --data dataSetB.csv --output outputs --task all
+
+# 只跑任务二优化
+python main.py --data dataSetB.csv --output outputs --task task2
+
+# 可选独立测试集（仅任务二在调参完成后预测）
+python main.py --data dataSetB.csv --test data/test.csv --output outputs --task task2
 ```
 
-参数说明：
+常用参数：
 
-- `--data`：原始 CSV 路径（必填）
-- `--output`：输出目录（默认 `outputs`）
-- `--test-size`：验证集比例（默认 `0.2`）
+- `--task`：`all` / `task1` / `task2` / `task3`
+- `--test-size`：最终验证集比例（默认 0.2）
+- `--task2-folds`：默认 5
+- `--task2-alpha-step`：默认 0.05
+- `--task2-threshold-min/max/step`：默认 0.30 / 0.80 / 0.005
 
-## 6. 输出目录说明
+## 6. 项目结构
 
 ```text
-outputs/
-├── data_overview.csv
-├── missing_report.csv
-├── target_distribution.csv
-├── overall_summary.csv
-├── task1/
-│   ├── metrics.json
-│   ├── validation_predictions.csv
-│   ├── confusion_matrix.csv / .png
-│   ├── feature_importance.csv / .png
-│   └── model.cbm
-├── task2/  （同上）
-└── task3/  （同上）
+project/
+├── main.py
+├── requirements.txt
+├── README.md
+└── src/
+    ├── config.py
+    ├── common/
+    │   ├── data_utils.py
+    │   ├── preprocessing.py
+    │   ├── metrics.py
+    │   ├── visualization.py
+    │   └── baseline.py
+    └── tasks/
+        ├── task1.py
+        ├── task2.py
+        └── task3.py
 ```
 
-## 7. 指标解释
+## 7. 任务二优化版说明
 
-- 每个任务主指标为验证集 **Accuracy**。
-- 同时输出 classification report、confusion matrix、特征重要性。
-- 内部验证加权分（**validation weighted score**，非最终比赛成绩）：
+### 7.1 基线为什么失效
+
+朴素任务二在类别不平衡下容易退化成“几乎全预测为 1”。此时 Accuracy 可能接近多数类比例（约 0.65），但几乎识别不了 0 类。因此不能只看 Accuracy，必须同时报告：
+
+- 多数类基准 Accuracy
+- Balanced Accuracy
+- 0/1 类 Recall
+- 混淆矩阵与预测类别计数
+
+### 7.2 多数类基准
+
+```text
+majority_baseline_accuracy = 数量最多的类别样本数 / 总样本数
+```
+
+若模型 Accuracy 不高于该基准，说明尚未形成有效分类提升。
+
+### 7.3 什么是 OOF
+
+OOF（Out-of-Fold）概率：开发集内做分层 K 折，每条样本的概率由**未见过该样本**的模型产生。`alpha` 与 `threshold` 只在 OOF 上搜索，最终 20% 验证集只评估一次。
+
+### 7.4 普通 CatBoost vs Balanced CatBoost
+
+- **普通模型**：不额外调整类别权重
+- **Balanced 模型**：`auto_class_weights="Balanced"`，提升对少数类的关注
+
+二者不一定谁更好，需用 OOF 比较。
+
+### 7.5 五个容易混淆的概念
+
+| 概念 | 含义 |
+|------|------|
+| 特征重要性 | 模型内部对特征贡献的度量，**不是**手工预测权重 |
+| 类别权重 | Balanced 模型对 0/1 类的样本权重 |
+| 模型融合权重 `alpha` | `p_final = alpha * p_plain + (1-alpha) * p_balanced` |
+| 官方任务评分权重 | 综合分里 ACC2 占 40%，**不乘到单条概率上** |
+| 分类阈值 `threshold` | `p_final >= threshold` 则预测为 1 |
+
+### 7.6 机制特征含义
+
+- `charging_gap_index`：距离远且便利度低 → 公共充电缺口大
+- `charging_convenience_index`：公共充电便利程度
+- `commute_ratio`：通勤在周出行中的占比
+- `fuel_income_pressure`：年燃油支出相对年收入压力
+- `replacement_pressure`：车龄 × 月燃油支出
+
+排除字段：`home_charging_available`、`ev_adoption_likelihood`、`range_anxiety_score`、`monthly_energy_consumption_kwh`、`monthly_charging_cost`。
+
+### 7.7 配置对比（A–E + M）
+
+| 配置 | 特征 | 模型 | 阈值 |
+|------|------|------|------|
+| A | 官方五特征 | plain | 0.5 |
+| B | 安全扩展原始特征 | plain | 0.5 |
+| C | 安全扩展 + 机制/代理特征 | plain | 0.5 |
+| D | 安全扩展 + 机制/代理特征 | balanced | 0.5 |
+| E | 同上 | plain+balanced 融合 | OOF 搜索 |
+| M | 无 | 多数类基线 | — |
+
+### 7.8 若 AUC 真的≈0.5（弱信号协议）
+
+流水线会在**开发集**上输出：
+
+- `diagnostics/separability.csv`：单变量可分性
+- `diagnostics/leak_risk_probe.csv`：对被排除字段的探查（不进模型）
+- `diagnostics/WEAK_SIGNAL_REPORT.md`：结论与建议
+
+当安全特征与泄露探查都接近随机，且模型 OOF Accuracy 无法显著超过多数类时，**自动选用配置 M**。  
+这意味着：再调阈值/融合也抬不高官方 Accuracy，竞赛应把精力转向任务一/三。
+
+### 7.9 任务二输出
+
+```text
+outputs/task2/
+├── diagnostics/
+│   ├── majority_baseline.json
+│   ├── separability.csv
+│   ├── leak_risk_probe.csv
+│   ├── weak_signal_report.json
+│   ├── WEAK_SIGNAL_REPORT.md
+│   ├── feature_quality.csv
+│   ├── target_distribution.csv
+│   ├── categorical_target_rates.csv
+│   └── numeric_group_statistics.csv
+├── oof/
+│   ├── plain_oof_predictions.csv
+│   ├── balanced_oof_predictions.csv
+│   ├── fold_metrics.csv
+│   └── model_comparison.csv
+├── tuning/
+│   ├── blend_threshold_search.csv
+│   └── best_blend_config.json
+├── final_validation/
+│   ├── metrics.json
+│   ├── predictions.csv
+│   ├── confusion_matrix.csv / .png
+│   ├── probability_distribution.png
+│   ├── roc_curve.png
+│   ├── feature_importance_*.csv / .png
+│   └── train_vs_validation.csv
+└── metrics.json
+```
+
+## 8. 指标与总成绩
+
+内部验证加权分（**validation weighted score**，非最终比赛成绩）：
 
 ```text
 weighted_score = 100 × (0.2 × ACC1 + 0.4 × ACC2 + 0.4 × ACC3)
 ```
 
-结果写入 `outputs/overall_summary.csv`。
+## 9. 当前版本限制
 
-## 8. 当前版本限制
-
-当前版本是朴素基线，只使用赛题建议特征、单次分层训练验证划分和单一 CatBoost 模型。
-尚未加入交叉验证、模型融合、复杂特征工程、阈值优化和超参数搜索。
+- 任务一 / 三仍为朴素基线，未改特征与模型逻辑
+- 任务二不做大规模超参搜索，不做 target encoding
+- 最终验证集不参与 alpha / threshold / 模型选择
+- 不保证任务二一定超过多数类基准
