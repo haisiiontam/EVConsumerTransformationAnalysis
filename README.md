@@ -188,9 +188,22 @@ outputs/task2/
 weighted_score = 100 × (0.2 × ACC1 + 0.4 × ACC2 + 0.4 × ACC3)
 ```
 
-## 9. 当前版本限制
+## 9. 任务三优化版（摘要）
 
-- 任务一 / 三仍为朴素基线，未改特征与模型逻辑
-- 任务二不做大规模超参搜索，不做 target encoding
-- 最终验证集不参与 alpha / threshold / 模型选择
-- 不保证任务二一定超过多数类基准
+可分性分析显示：`environmental_awareness_score`、`ev_knowledge_score`、`technology_affinity_score`、`annual_income` 对「高里程焦虑」有强信号；官方五特征中仅 `ev_knowledge_score` 很强。
+
+优化流程（`src/tasks/task3.py`）：
+
+1. 开发集可分性诊断  
+2. 配置 A/B/C：官方五特征 / 安全扩展 / 扩展+机制特征  
+3. 分层 5 折 OOF + 阈值搜索（最终 20% 不参与调参）  
+4. 选定配置后在完整开发集重训，验证集只评估一次  
+
+任务二详细结论见 [`docs/TASK2_SUMMARY.md`](docs/TASK2_SUMMARY.md)。
+
+## 10. 当前版本限制
+
+- 任务一仍为朴素基线
+- 任务二为弱信号，采用多数类策略稳住 ACC2
+- 最终验证集不参与模型/阈值选择
+- 不做 target encoding、不做大规模超参搜索

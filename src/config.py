@@ -135,11 +135,14 @@ TASK2_EARLY_STOPPING_ROUNDS: int = 80
 TASK2_TIE_EPS: float = 0.0005
 
 # ---------------------------------------------------------------------------
-# 任务三：里程焦虑敏感度识别——保持原朴素基线逻辑
+# 任务三：里程焦虑敏感度识别（优化版）
 # ---------------------------------------------------------------------------
 TASK3_NAME: str = "task3"
 TASK3_SOURCE_SCORE: str = "range_anxiety_score"
-TASK3_THRESHOLD: float = 5.0
+TASK3_THRESHOLD: float = 5.0  # >5 -> 1，否则 0
+TASK3_LABEL_ORDER: List[str] = ["0", "1"]
+
+# 官方建议特征（配置 A 基线对照）
 TASK3_FEATURES: List[str] = [
     "daily_commute_km",
     "weekly_travel_distance_km",
@@ -147,7 +150,67 @@ TASK3_FEATURES: List[str] = [
     "ev_knowledge_score",
     "battery_replacement_concern",
 ]
-TASK3_LABEL_ORDER: List[str] = ["0", "1"]
+TASK3_OFFICIAL_FEATURES: List[str] = list(TASK3_FEATURES)
+
+# 可分性分析确认的强信号特征（必须优先纳入）
+TASK3_STRONG_FEATURES: List[str] = [
+    "environmental_awareness_score",
+    "ev_knowledge_score",
+    "technology_affinity_score",
+    "annual_income",
+]
+
+# 安全扩展候选（缺失则跳过；禁止使用其他任务目标与标签源）
+TASK3_SAFE_CANDIDATE_FEATURES: List[str] = [
+    "daily_commute_km",
+    "weekly_travel_distance_km",
+    "charging_station_accessibility",
+    "ev_knowledge_score",
+    "battery_replacement_concern",
+    "environmental_awareness_score",
+    "technology_affinity_score",
+    "annual_income",
+    "age",
+    "education_level",
+    "city_type",
+    "current_vehicle_type",
+    "vehicle_age_years",
+    "fuel_expense_per_month",
+    "nearest_charging_station_km",
+    "electricity_cost_per_kwh",
+    "government_incentive_awareness",
+    "previous_ev_experience",
+]
+
+TASK3_EXCLUDED_FEATURES: List[str] = [
+    "range_anxiety_score",  # 标签源
+    "home_charging_available",  # 任务二目标
+    "ev_adoption_likelihood",  # 任务一目标
+    "monthly_energy_consumption_kwh",  # 潜在后验
+    "monthly_charging_cost",
+]
+
+TASK3_MECHANISM_FEATURES: List[str] = [
+    "log_annual_income",
+    "commute_ratio",
+    "knowledge_deficit",
+    "eco_tech_mean",
+    "eco_minus_tech",
+    "fuel_income_pressure",
+]
+
+TASK3_KNOWN_CATEGORICAL: List[str] = [
+    "education_level",
+    "city_type",
+    "current_vehicle_type",
+]
+
+TASK3_N_FOLDS: int = 5
+TASK3_THRESHOLD_MIN: float = 0.30
+TASK3_THRESHOLD_MAX: float = 0.70
+TASK3_THRESHOLD_STEP: float = 0.005
+TASK3_EARLY_STOPPING_ROUNDS: int = 80
+TASK3_TIE_EPS: float = 0.0005
 
 # 三个任务启动检查：至少包含官方基础字段
 REQUIRED_COLUMNS: List[str] = sorted(
@@ -186,10 +249,24 @@ TASK1_MODEL_PARAMS: Dict[str, Any] = {
     "eval_metric": "Accuracy",
 }
 
+# 任务三旧基线参数（配置 A 对照仍可用）
 TASK3_MODEL_PARAMS: Dict[str, Any] = {
     **CATBOOST_BASELINE_COMMON,
     "loss_function": "Logloss",
     "eval_metric": "Accuracy",
+}
+
+# 任务三优化版参数
+TASK3_CATBOOST_COMMON: Dict[str, Any] = {
+    "loss_function": "Logloss",
+    "eval_metric": "Accuracy",
+    "iterations": 500,
+    "depth": 6,
+    "learning_rate": 0.05,
+    "l2_leaf_reg": 5.0,
+    "random_seed": RANDOM_SEED,
+    "verbose": False,
+    "allow_writing_files": False,
 }
 
 # 任务二优化版参数
