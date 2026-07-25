@@ -11,10 +11,13 @@ RANDOM_SEED: int = 42
 DEFAULT_TEST_SIZE: float = 0.2
 
 # ---------------------------------------------------------------------------
-# 任务一：电动汽车采用意愿分类（三分类）——保持原朴素基线逻辑
+# 任务一：电动汽车采用意愿分类（三分类，优化版）
 # ---------------------------------------------------------------------------
 TASK1_NAME: str = "task1"
 TASK1_TARGET: str = "ev_adoption_likelihood"
+TASK1_LABEL_ORDER: List[str] = ["Low", "Medium", "High"]
+
+# 官方建议特征（配置 A 对照）
 TASK1_FEATURES: List[str] = [
     "annual_income",
     "education_level",
@@ -23,7 +26,66 @@ TASK1_FEATURES: List[str] = [
     "range_anxiety_score",
     "fuel_expense_per_month",
 ]
-TASK1_LABEL_ORDER: List[str] = ["Low", "Medium", "High"]
+TASK1_OFFICIAL_FEATURES: List[str] = list(TASK1_FEATURES)
+
+# 可分性分析确认的强信号特征
+TASK1_STRONG_FEATURES: List[str] = [
+    "ev_knowledge_score",
+    "range_anxiety_score",
+    "technology_affinity_score",
+    "environmental_awareness_score",
+    "annual_income",
+]
+
+# 安全扩展候选（缺失则跳过）
+TASK1_SAFE_CANDIDATE_FEATURES: List[str] = [
+    "annual_income",
+    "education_level",
+    "environmental_awareness_score",
+    "technology_affinity_score",
+    "range_anxiety_score",
+    "fuel_expense_per_month",
+    "ev_knowledge_score",
+    "battery_replacement_concern",
+    "government_incentive_awareness",
+    "charging_station_accessibility",
+    "nearest_charging_station_km",
+    "previous_ev_experience",
+    "age",
+    "city_type",
+    "current_vehicle_type",
+    "vehicle_age_years",
+    "daily_commute_km",
+    "weekly_travel_distance_km",
+    "electricity_cost_per_kwh",
+]
+
+TASK1_EXCLUDED_FEATURES: List[str] = [
+    "ev_adoption_likelihood",  # 目标
+    "home_charging_available",  # 任务二目标
+    "monthly_energy_consumption_kwh",  # 潜在后验
+    "monthly_charging_cost",
+]
+
+TASK1_MECHANISM_FEATURES: List[str] = [
+    "log_annual_income",
+    "knowledge_deficit",
+    "eco_tech_mean",
+    "eco_minus_tech",
+    "anxiety_knowledge_gap",
+    "fuel_income_pressure",
+    "commute_ratio",
+]
+
+TASK1_KNOWN_CATEGORICAL: List[str] = [
+    "education_level",
+    "city_type",
+    "current_vehicle_type",
+]
+
+TASK1_N_FOLDS: int = 5
+TASK1_EARLY_STOPPING_ROUNDS: int = 80
+TASK1_TIE_EPS: float = 0.0005
 
 # ---------------------------------------------------------------------------
 # 任务二：家庭充电条件预测（二分类）——优化版
@@ -247,6 +309,19 @@ TASK1_MODEL_PARAMS: Dict[str, Any] = {
     **CATBOOST_BASELINE_COMMON,
     "loss_function": "MultiClass",
     "eval_metric": "Accuracy",
+}
+
+# 任务一优化版参数
+TASK1_CATBOOST_COMMON: Dict[str, Any] = {
+    "loss_function": "MultiClass",
+    "eval_metric": "Accuracy",
+    "iterations": 500,
+    "depth": 6,
+    "learning_rate": 0.05,
+    "l2_leaf_reg": 5.0,
+    "random_seed": RANDOM_SEED,
+    "verbose": False,
+    "allow_writing_files": False,
 }
 
 # 任务三旧基线参数（配置 A 对照仍可用）
