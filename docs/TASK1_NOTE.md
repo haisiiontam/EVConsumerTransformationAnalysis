@@ -1,32 +1,37 @@
-# 任务一优化简记
+# 任务一优化简记（全量增强版）
 
-## 可分性结论
+## 正式结论（`--mode full`，已完成）
 
-目标：`ev_adoption_likelihood`（Low / Medium / High）
+| 项 | 值 |
+|---|---|
+| 稳定基线 | `B_safe_raw`，OOF ≈ **0.8560**，Final ≈ **0.8592** |
+| 锁定方案 | **`soft_vote`**（M6 0.55 + M1 0.35 + M3 0.10） |
+| 增强 OOF | **0.8587** |
+| 增强 Final | **0.8601** |
+| 多 seed | mean ≈ 0.8563（相对基线稳定） |
+| **合并建议** | **是（YES）** |
 
-标签分布约：High 59.3%，Medium 24.2%，Low 16.5%；多数类基准 ≈ **0.593**。
+权威产物目录：`outputs/task1/`（见其中 `README.md`）。  
+论文材料：`outputs/task1/paper/` 与仓库 `docs/task1_*.md`。
 
-| 特征 | 互信息 MI（约） | 说明 |
-|------|----------------|------|
-| ev_knowledge_score | 0.35 | 最强（官方未列，但很有用） |
-| range_anxiety_score | 0.32 | 强（官方建议） |
-| technology_affinity_score | 0.31 | 强（官方建议） |
-| environmental_awareness_score | 0.31 | 强（官方建议） |
-| annual_income | 0.10 | 中等（官方建议） |
-| fuel_expense_per_month / education_level | ~0 | 官方建议中几乎无信号 |
-
-## OOF 对比（开发集）
-
-| 配置 | 特征 | OOF Accuracy |
-|------|------|--------------|
-| A | 官方 6 特征 | ~0.78 |
-| B | 安全扩展 | ~0.85+ |
-| C | 安全扩展 + 机制特征 | 通常最优或接近最优 |
-
-禁止特征：`ev_adoption_likelihood`、`home_charging_available`、能耗/充电费用后验字段。
+稳定版快照：`backups/task1_stable_50662a4.py`。增强代码：`src/tasks/task1/`（含断点续跑 / 每折 checkpoint / Optuna CSV 复用）。
 
 ## 运行
 
 ```bash
-python main.py --data dataSetB.csv --output outputs --task task1
+# 冒烟
+python main.py --data dataSetB.csv --output outputs --task task1 --mode quick
+
+# 论文全量
+python main.py --data dataSetB.csv --output outputs --task task1 --mode full
+
+# 断点续跑（跳过已完成 Optuna）
+python main.py --data dataSetB.csv --output outputs --task task1 --mode full --resume --skip-optuna --start-stage m1_catboost
 ```
+
+禁止特征：`ev_adoption_likelihood`、`home_charging_available`、能耗/充电费用后验字段（见 `uncertain_features.json`）。
+
+## 说明
+
+- SHAP：本机 Python 3.14 上易原生崩溃，已改为独立子进程；失败不阻断主结果。可单独跑 `scripts/run_task1_shap_worker.py`。
+- 旧 quick 产物已迁到 `outputs/task1/_archive/stale_quick/`，勿与本次 full 混用。

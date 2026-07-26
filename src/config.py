@@ -77,15 +77,62 @@ TASK1_MECHANISM_FEATURES: List[str] = [
     "commute_ratio",
 ]
 
+# 论文增强版机制分组（C1–C6）
+TASK1_MECH_GROUPS: Dict[str, List[str]] = {
+    "C1_economy": [
+        "log_annual_income",
+        "monthly_income",
+        "fuel_income_pressure",
+        "fuel_monthly_income_ratio",
+    ],
+    "C2_eco_tech": [
+        "eco_tech_mean",
+        "eco_tech_interaction",
+        "eco_minus_tech",
+    ],
+    "C3_cognition": [
+        "knowledge_tech_gap",
+        "knowledge_tech_mean",
+        "experience_tech_interaction",
+        "knowledge_deficit",
+    ],
+    "C4_anxiety": [
+        "anxiety_concern_interaction",
+        "anxiety_knowledge_ratio",
+        "concern_knowledge_ratio",
+        "anxiety_knowledge_gap",
+    ],
+    "C5_travel": [
+        "average_daily_travel",
+        "travel_pressure",
+        "commute_ratio",
+    ],
+    "C6_charging": [
+        "charging_gap",
+        "charging_convenience",
+        "incentive_income_interaction",
+    ],
+}
+
+TASK1_UNCERTAIN_FEATURES: List[str] = [
+    "monthly_energy_consumption_kwh",
+    "monthly_charging_cost",
+]
+
 TASK1_KNOWN_CATEGORICAL: List[str] = [
     "education_level",
     "city_type",
     "current_vehicle_type",
+    "previous_ev_experience",
 ]
 
 TASK1_N_FOLDS: int = 5
 TASK1_EARLY_STOPPING_ROUNDS: int = 80
 TASK1_TIE_EPS: float = 0.0005
+TASK1_STABILITY_SEEDS: List[int] = [42, 52, 62]
+TASK1_OPTUNA_TRIALS_CB: int = 40
+TASK1_OPTUNA_TRIALS_LGB: int = 25
+TASK1_OPTUNA_COARSE_FOLDS: int = 3
 
 # ---------------------------------------------------------------------------
 # 任务二：家庭充电条件预测（二分类）——优化版

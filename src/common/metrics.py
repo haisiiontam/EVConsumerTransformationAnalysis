@@ -24,12 +24,30 @@ from sklearn.metrics import (
 logger = logging.getLogger(__name__)
 
 
+def _json_default(obj: Any) -> Any:
+    """兼容 numpy / pandas 标量，避免 json.dump 失败。"""
+    if isinstance(obj, (np.bool_,)):
+        return bool(obj)
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    if isinstance(obj, (np.floating,)):
+        return float(obj)
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if hasattr(obj, "item"):
+        try:
+            return obj.item()
+        except Exception:
+            pass
+    raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
+
+
 def save_json(data: Dict[str, Any], path: Path) -> None:
     """保存 JSON（UTF-8，ensure_ascii=False）。"""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+        json.dump(data, f, ensure_ascii=False, indent=2, default=_json_default)
     logger.info("已保存 JSON：%s", path)
 
 

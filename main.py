@@ -57,6 +57,21 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="运行任务：all / task1 / task2 / task3",
     )
     parser.add_argument(
+        "--mode",
+        type=str,
+        default="full",
+        choices=["quick", "full"],
+        help="任务一运行模式：quick（冒烟）/ full（论文全量，默认）",
+    )
+    parser.add_argument("--resume", action="store_true", help="任务一：断点续跑（冻结划分，跳过已完成阶段）")
+    parser.add_argument("--start-stage", type=str, default=None, help="任务一：从指定 stage 开始")
+    parser.add_argument("--stop-after-stage", type=str, default=None, help="任务一：在指定 stage 后停止")
+    parser.add_argument("--run-id", type=str, default=None, help="任务一：运行 ID（日志/run_state）")
+    parser.add_argument("--skip-optuna", action="store_true", help="任务一：跳过 Optuna 调参")
+    parser.add_argument("--skip-multiseed", action="store_true", help="任务一：跳过多 seed 稳定性")
+    parser.add_argument("--skip-shap", action="store_true", help="任务一：跳过 SHAP")
+    parser.add_argument("--audit-only", action="store_true", help="任务一：仅审计输出文件，不训练")
+    parser.add_argument(
         "--test",
         type=str,
         default=None,
@@ -143,8 +158,24 @@ def main(argv: list[str] | None = None) -> int:
     }
 
     if args.task in ("all", "task1"):
-        m1 = task1.run(df, output_dirs["task1"], test_size=args.test_size)
-        accuracies["ACC1"] = float(m1["accuracy"])
+        m1 = task1.run(
+            df,
+            output_dirs["task1"],
+            test_size=args.test_size,
+            mode=args.mode,
+            resume=args.resume,
+            start_stage=args.start_stage,
+            stop_after_stage=args.stop_after_stage,
+            run_id=args.run_id,
+            skip_optuna=args.skip_optuna,
+            skip_multiseed=args.skip_multiseed,
+            skip_shap=args.skip_shap,
+            audit_only=args.audit_only,
+        )
+        if args.audit_only or (isinstance(m1.get("accuracy"), float) and m1["accuracy"] != m1["accuracy"]):
+            accuracies["ACC1"] = None
+        else:
+            accuracies["ACC1"] = float(m1["accuracy"])
 
     if args.task in ("all", "task2"):
         m2 = task2.run(
