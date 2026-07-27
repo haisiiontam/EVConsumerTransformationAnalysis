@@ -533,6 +533,19 @@ def run(
             if p.exists():
                 candidate_oofs[model_key] = pd.read_csv(p)
 
+    # ---- cross_task_aux (full) ----
+    if gate.should_execute("cross_task_aux"):
+        gate.begin("cross_task_aux")
+        try:
+            from src.tasks.task2.cross_task_aux import generate_cross_task_oof_features
+
+            generate_cross_task_oof_features(
+                df_dev, fold_assign, output_dir / "diagnostics" / "cross_task_aux", n_folds=n_folds
+            )
+            gate.complete("cross_task_aux")
+        except Exception as e:
+            gate.partial("cross_task_aux", error=str(e))
+
     # ---- diversity ----
     if gate.should_execute("diversity"):
         gate.begin("diversity")

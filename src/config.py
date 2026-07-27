@@ -244,10 +244,14 @@ TASK2_EARLY_STOPPING_ROUNDS: int = 80
 TASK2_TIE_EPS: float = 0.0005
 TASK2_STABILITY_SEEDS: List[int] = [42, 52, 62]
 TASK2_ENABLE_TABNET: bool = False
-TASK2_ENABLE_CROSS_TASK_AUX: bool = False
+TASK2_ENABLE_CROSS_TASK_AUX: bool = True
 TASK2_ENABLE_CLUSTERING: bool = True
+# 问卷原字段：ACC 冲高消融可临时纳入；默认正式排除列表仍含 range_anxiety_score
+TASK2_ALLOW_ANXIETY_ABLATION: bool = True
+TASK2_UNCERTAIN_FEATURES: List[str] = ["range_anxiety_score"]
 TASK2_PERMUTATION_N: int = 200
 TASK2_BOOTSTRAP_N: int = 1000
+TASK2_ACC_BOOST_MIN_LIFT: float = 0.0005
 
 # 任务二阶段（弱信号诊断与稳健决策）
 TASK2_STAGES: List[str] = [

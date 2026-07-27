@@ -1,0 +1,48 @@
+{
+  "aux_input_features": [
+    "age",
+    "annual_income",
+    "education_level",
+    "city_type",
+    "daily_commute_km",
+    "weekly_travel_distance_km",
+    "current_vehicle_type",
+    "vehicle_age_years",
+    "fuel_expense_per_month",
+    "charging_station_accessibility",
+    "nearest_charging_station_km",
+    "electricity_cost_per_kwh",
+    "environmental_awareness_score",
+    "government_incentive_awareness",
+    "technology_affinity_score",
+    "battery_replacement_concern",
+    "ev_knowledge_score",
+    "previous_ev_experience",
+    "range_anxiety_score"
+  ],
+  "t3_input_features": [
+    "age",
+    "annual_income",
+    "education_level",
+    "city_type",
+    "daily_commute_km",
+    "weekly_travel_distance_km",
+    "current_vehicle_type",
+    "vehicle_age_years",
+    "fuel_expense_per_month",
+    "charging_station_accessibility",
+    "nearest_charging_station_km",
+    "electricity_cost_per_kwh",
+    "environmental_awareness_score",
+    "government_incentive_awareness",
+    "technology_affinity_score",
+    "battery_replacement_concern",
+    "ev_knowledge_score",
+    "previous_ev_experience"
+  ],
+  "note": "OOF predictions only; never use true ev_adoption_likelihood as task2 input",
+  "banned_as_input": [
+    "home_charging_available",
+    "ev_adoption_likelihood"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "majority_accuracy": 0.64975,
+  "majority_class": 1,
+  "best_candidate": "B_safe_missing_logistic@thr0.550",
+  "best_accuracy": 0.649825,
+  "best_lift": 7.499999999993623e-05,
+  "min_lift_required": 0.0005,
+  "passed_oof_lift": false,
+  "passed_multiseed": false,
+  "passed_bootstrap": false,
+  "relock_recommended": false
+}
