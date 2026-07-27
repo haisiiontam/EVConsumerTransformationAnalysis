@@ -1,0 +1,10 @@
+{
+  "locked_scheme": "M",
+  "lock_reason": "no Acc lift > 0.0005 over majority; max |AUC-0.5|=0.0066 < 0.02",
+  "majority_baseline_accuracy": 0.64976,
+  "best_model_accuracy": 0.6498,
+  "max_auc_gap_from_0_5": 0.006552932152293689,
+  "is_weak_signal_lock": true,
+  "oof_accuracy": 0.64975,
+  "oof_roc_auc": 0.5
+}

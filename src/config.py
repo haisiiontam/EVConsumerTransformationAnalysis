@@ -242,6 +242,46 @@ TASK2_THRESHOLD_MAX: float = 0.80
 TASK2_THRESHOLD_STEP: float = 0.005
 TASK2_EARLY_STOPPING_ROUNDS: int = 80
 TASK2_TIE_EPS: float = 0.0005
+TASK2_STABILITY_SEEDS: List[int] = [42, 52, 62]
+TASK2_ENABLE_TABNET: bool = False
+TASK2_ENABLE_CROSS_TASK_AUX: bool = False
+TASK2_ENABLE_CLUSTERING: bool = True
+TASK2_PERMUTATION_N: int = 200
+TASK2_BOOTSTRAP_N: int = 1000
+
+# 任务二阶段（弱信号诊断与稳健决策）
+TASK2_STAGES: List[str] = [
+    "audit",
+    "split",
+    "baseline",
+    "label_audit",
+    "separability",
+    "missingness",
+    "segment_analysis",
+    "feature_ablation",
+    "empirical_bayes",
+    "clustering_prior",
+    "m1_logistic_gam",
+    "m2_catboost",
+    "m3_lightgbm",
+    "m4_xgboost",
+    "m5_extra_trees",
+    "m6_tabnet",
+    "cross_task_aux",
+    "diversity",
+    "soft_blend",
+    "stacking",
+    "calibration",
+    "threshold",
+    "permutation_test",
+    "multiseed",
+    "bootstrap",
+    "final_lock",
+    "final_validation",
+    "explain",
+    "report",
+    "submission",
+]
 
 # ---------------------------------------------------------------------------
 # 任务三：里程焦虑敏感度识别（优化版）

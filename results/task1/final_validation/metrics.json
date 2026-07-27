@@ -1,0 +1,138 @@
+{
+  "mode": "full",
+  "selected_configuration": "soft_vote",
+  "oof_accuracy": 0.858725,
+  "oof_metrics": {
+    "accuracy": 0.858725,
+    "macro_f1": 0.8172110788151747,
+    "weighted_f1": 0.8582171175444233,
+    "qwk": 0.8754070702160012,
+    "adjacent_error_rate": 0.141175,
+    "cross_two_level_errors": 4,
+    "medium_recall": 0.7073069757814117,
+    "precision_Low": 0.8320865828425911,
+    "recall_Low": 0.7918812481066344,
+    "f1_Low": 0.8114862242918122,
+    "precision_Medium": 0.7079664353050865,
+    "recall_Medium": 0.7073069757814117,
+    "f1_Medium": 0.7076365519026663,
+    "precision_High": 0.9261552526595744,
+    "recall_High": 0.938953488372093,
+    "f1_High": 0.932510460251046,
+    "logloss": 0.3229699324680932
+  },
+  "final_validation": {
+    "accuracy": 0.8601,
+    "macro_f1": 0.8160993101064337,
+    "weighted_f1": 0.8593916317123416,
+    "qwk": 0.8769326651924514,
+    "adjacent_error_rate": 0.1397,
+    "cross_two_level_errors": 2,
+    "medium_recall": 0.7040562913907285,
+    "precision_Low": 0.815625,
+    "recall_Low": 0.7909090909090909,
+    "f1_Low": 0.803076923076923,
+    "precision_Medium": 0.7138061267310113,
+    "recall_Medium": 0.7040562913907285,
+    "f1_Medium": 0.7088976870181288,
+    "precision_High": 0.929865381419312,
+    "recall_High": 0.9428715874620829,
+    "f1_High": 0.936323320224249,
+    "logloss": 0.3107409152642308
+  },
+  "baseline_final_validation": {
+    "accuracy": 0.8592,
+    "macro_f1": 0.8143268601695199,
+    "weighted_f1": 0.8583745710884243,
+    "qwk": 0.8760218465288642,
+    "adjacent_error_rate": 0.1406,
+    "cross_two_level_errors": 2,
+    "medium_recall": 0.7011589403973509,
+    "precision_Low": 0.8141870684243565,
+    "recall_Low": 0.786060606060606,
+    "f1_Low": 0.7998766574159729,
+    "precision_Medium": 0.712363330529857,
+    "recall_Medium": 0.7011589403973509,
+    "f1_Medium": 0.7067167292448895,
+    "precision_High": 0.9290097860341682,
+    "recall_High": 0.9438827098078868,
+    "f1_High": 0.9363871938476971,
+    "logloss": 0.314882348061534
+  },
+  "baseline_oof_accuracy": 0.856025,
+  "n_features": 40,
+  "features": [
+    "annual_income",
+    "education_level",
+    "environmental_awareness_score",
+    "technology_affinity_score",
+    "range_anxiety_score",
+    "fuel_expense_per_month",
+    "ev_knowledge_score",
+    "battery_replacement_concern",
+    "government_incentive_awareness",
+    "charging_station_accessibility",
+    "nearest_charging_station_km",
+    "previous_ev_experience",
+    "age",
+    "city_type",
+    "current_vehicle_type",
+    "vehicle_age_years",
+    "daily_commute_km",
+    "weekly_travel_distance_km",
+    "electricity_cost_per_kwh",
+    "log_annual_income",
+    "monthly_income",
+    "fuel_income_pressure",
+    "fuel_monthly_income_ratio",
+    "eco_tech_mean",
+    "eco_tech_interaction",
+    "eco_minus_tech",
+    "knowledge_tech_gap",
+    "knowledge_tech_mean",
+    "experience_tech_interaction",
+    "knowledge_deficit",
+    "anxiety_concern_interaction",
+    "anxiety_knowledge_ratio",
+    "concern_knowledge_ratio",
+    "anxiety_knowledge_gap",
+    "average_daily_travel",
+    "travel_pressure",
+    "commute_ratio",
+    "charging_gap",
+    "charging_convenience",
+    "incentive_income_interaction"
+  ],
+  "recommend_merge": true,
+  "stable_ok": true,
+  "module_scores": {
+    "baseline_stable": {
+      "accuracy": 0.856025,
+      "note": "loaded B_safe_raw"
+    },
+    "M1_catboost": {
+      "accuracy": 0.85725,
+      "note": "best single CatBoost"
+    },
+    "M2_ordinal": {
+      "accuracy": 0.8554,
+      "note": "dual boundary"
+    },
+    "M3_reg_soft": {
+      "accuracy": 0.85675,
+      "note": "T=0.1"
+    },
+    "M3_reg_hard": {
+      "accuracy": 0.85675,
+      "note": "threshold mapping"
+    },
+    "M4_lgbm": {
+      "accuracy": 0.8543,
+      "note": "lightgbm"
+    },
+    "M6_ord_logit": {
+      "accuracy": 0.8581,
+      "note": "interpretable baseline"
+    }
+  }
+}

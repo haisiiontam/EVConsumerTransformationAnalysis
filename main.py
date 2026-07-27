@@ -61,18 +61,53 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=str,
         default="full",
         choices=["quick", "full"],
-        help="任务一/三运行模式：quick（冒烟）/ full（论文全量，默认）",
+        help="运行模式：quick（冒烟）/ full（论文全量，默认）；任务二默认 quick",
     )
-    parser.add_argument("--resume", action="store_true", help="任务一/三：断点续跑（冻结划分，跳过已完成阶段）")
-    parser.add_argument("--start-stage", type=str, default=None, help="任务一/三：从指定 stage 开始")
-    parser.add_argument("--stop-after-stage", type=str, default=None, help="任务一/三：在指定 stage 后停止")
-    parser.add_argument("--run-id", type=str, default=None, help="任务一/三：运行 ID（日志/run_state）")
-    parser.add_argument("--skip-optuna", action="store_true", help="任务一/三：跳过 Optuna 调参")
-    parser.add_argument("--skip-multiseed", action="store_true", help="任务一/三：跳过多 seed 稳定性")
-    parser.add_argument("--skip-shap", action="store_true", help="任务一/三：跳过 SHAP")
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="任务一/二/三：断点续跑（冻结划分，跳过已完成阶段）",
+    )
+    parser.add_argument(
+        "--start-stage",
+        type=str,
+        default=None,
+        help="任务一/二/三：从指定 stage 开始",
+    )
+    parser.add_argument(
+        "--stop-after-stage",
+        type=str,
+        default=None,
+        help="任务一/二/三：在指定 stage 后停止",
+    )
+    parser.add_argument(
+        "--run-id",
+        type=str,
+        default=None,
+        help="任务一/二/三：运行 ID（日志/run_state）",
+    )
+    parser.add_argument(
+        "--skip-optuna",
+        action="store_true",
+        help="任务一/三：跳过 Optuna 调参",
+    )
+    parser.add_argument(
+        "--skip-multiseed",
+        action="store_true",
+        help="任务一/二/三：跳过多 seed 稳定性",
+    )
+    parser.add_argument(
+        "--skip-shap",
+        action="store_true",
+        help="任务一/二/三：跳过 SHAP/解释阶段",
+    )
     parser.add_argument("--skip-deep", action="store_true", help="任务三：跳过深度/异构增强阶段")
     parser.add_argument("--skip-robustness", action="store_true", help="任务三：跳过鲁棒性阶段")
-    parser.add_argument("--audit-only", action="store_true", help="任务一/三：仅审计输出文件，不训练")
+    parser.add_argument(
+        "--audit-only",
+        action="store_true",
+        help="任务一/二/三：仅审计输出文件，不训练",
+    )
     parser.add_argument(
         "--test",
         type=str,
@@ -180,18 +215,33 @@ def main(argv: list[str] | None = None) -> int:
             accuracies["ACC1"] = float(m1["accuracy"])
 
     if args.task in ("all", "task2"):
+        task2_mode = args.mode if args.task == "task2" else "quick"
         m2 = task2.run(
             df,
             output_dirs["task2"],
             test_size=args.test_size,
+            mode=task2_mode,
+            resume=args.resume,
+            start_stage=args.start_stage,
+            stop_after_stage=args.stop_after_stage,
+            run_id=args.run_id,
+            skip_optuna=args.skip_optuna,
+            skip_multiseed=args.skip_multiseed,
+            skip_shap=args.skip_shap,
+            audit_only=args.audit_only,
+            test_df=test_df,
             n_folds=args.task2_folds,
             alpha_step=args.task2_alpha_step,
             threshold_min=args.task2_threshold_min,
             threshold_max=args.task2_threshold_max,
             threshold_step=args.task2_threshold_step,
-            test_df=test_df,
         )
-        accuracies["ACC2"] = float(m2["accuracy"])
+        if args.audit_only or (
+            isinstance(m2.get("accuracy"), float) and m2["accuracy"] != m2["accuracy"]
+        ):
+            accuracies["ACC2"] = None
+        else:
+            accuracies["ACC2"] = float(m2["accuracy"])
 
     if args.task in ("all", "task3"):
         m3 = task3.run(

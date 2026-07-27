@@ -8,10 +8,22 @@ __pycache__/
 venv/
 .env
 
-# 运行产出（可本地复现，不入库）
+# 本地完整跑次（可复现，不入库）
 outputs/
 *.log
 *.cbm
+
+# 即使误拷入 results，也不跟踪这些重物
+**/checkpoints/
+**/_archive/
+**/logs/
+**/resume_audit/
+**/*_oof_predictions.csv
+
+# 备份与临时
+backups/
+scripts/_peek_*.py
+scripts/_tmp_*.py
 
 # 系统与编辑器
 .DS_Store

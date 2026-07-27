@@ -1,0 +1,17 @@
+{
+  "available": true,
+  "weights": {
+    "lightgbm": 0.0,
+    "logistic_none": 1.0,
+    "logistic_balanced": 0.0,
+    "eb_best": 0.0
+  },
+  "accuracy": 0.64975,
+  "roc_auc": 0.5065010591291494,
+  "models": [
+    "lightgbm",
+    "logistic_none",
+    "logistic_balanced",
+    "eb_best"
+  ]
+}

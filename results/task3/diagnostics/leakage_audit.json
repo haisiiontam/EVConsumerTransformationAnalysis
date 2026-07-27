@@ -1,0 +1,11 @@
+{
+  "excluded": [
+    "range_anxiety_score",
+    "home_charging_available",
+    "ev_adoption_likelihood",
+    "monthly_energy_consumption_kwh",
+    "monthly_charging_cost"
+  ],
+  "source_score": "range_anxiety_score",
+  "rule": "score only for label / regression target, never classification X"
+}

@@ -1,0 +1,13 @@
+{
+  "ACC1": 0.8601,
+  "ACC2": 0.6498,
+  "ACC3": 0.8529,
+  "weighted_score": 0.73306,
+  "formula": "0.2*ACC1 + 0.4*ACC2 + 0.4*ACC3",
+  "note": "internal holdout validation only; not official contest score",
+  "schemes": {
+    "task1": "soft_vote",
+    "task2": "M",
+    "task3": "boost_B+B_concern_soft"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "has_missing_in_safe_features": true,
+  "message": "存在缺失；已记录 __is_missing 指示器与目标率差异（诊断用）。",
+  "n_features_with_missing": 3
+}

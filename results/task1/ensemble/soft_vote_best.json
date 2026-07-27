@@ -1,0 +1,25 @@
+{
+  "accuracy": 0.858725,
+  "weights": {
+    "M6_ord_logit": 0.55,
+    "M1_catboost": 0.35,
+    "M3_reg_soft": 0.1,
+    "baseline": 0.0
+  },
+  "macro_f1": 0.8172110788151747,
+  "weighted_f1": 0.8582171175444233,
+  "qwk": 0.8754070702160012,
+  "adjacent_error_rate": 0.141175,
+  "cross_two_level_errors": 4,
+  "medium_recall": 0.7073069757814117,
+  "precision_Low": 0.8320865828425911,
+  "recall_Low": 0.7918812481066344,
+  "f1_Low": 0.8114862242918122,
+  "precision_Medium": 0.7079664353050865,
+  "recall_Medium": 0.7073069757814117,
+  "f1_Medium": 0.7076365519026663,
+  "precision_High": 0.9261552526595744,
+  "recall_High": 0.938953488372093,
+  "f1_High": 0.932510460251046,
+  "logloss": 0.3229699324680932
+}

@@ -1,0 +1,7 @@
+{
+  "n01_model_wrong_majority_right": 0,
+  "n10_model_right_majority_wrong": 0,
+  "statistic": 1.0,
+  "p_value": 0.31731050786291115,
+  "note": "If both always predict majority, n01=n10=0."
+}

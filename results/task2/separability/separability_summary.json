@@ -1,0 +1,5 @@
+{
+  "n_features": 44,
+  "max_auc_gap_from_0_5": 0.008846629915036264,
+  "mutual_info_computed": true
+}

@@ -1,0 +1,187 @@
+{
+  "task_name": "task3",
+  "accuracy": 0.8529,
+  "oof_accuracy": 0.861925,
+  "threshold": 0.5,
+  "selected_configuration": "boost_B+B_concern_soft",
+  "majority_baseline_accuracy": 0.5079,
+  "final_validation": {
+    "scheme": "boost_B+B_concern_soft",
+    "features": [
+      "daily_commute_km",
+      "weekly_travel_distance_km",
+      "charging_station_accessibility",
+      "ev_knowledge_score",
+      "battery_replacement_concern",
+      "environmental_awareness_score",
+      "technology_affinity_score",
+      "annual_income",
+      "age",
+      "education_level",
+      "city_type",
+      "current_vehicle_type",
+      "vehicle_age_years",
+      "fuel_expense_per_month",
+      "nearest_charging_station_km",
+      "electricity_cost_per_kwh",
+      "government_incentive_awareness",
+      "previous_ev_experience",
+      "concern_knowledge_ratio",
+      "concern_tech_ratio",
+      "concern_knowledge_gap",
+      "concern_tech_gap"
+    ],
+    "m1_params": {
+      "loss_function": "Logloss",
+      "eval_metric": "Accuracy",
+      "iterations": 619,
+      "depth": 6,
+      "learning_rate": 0.03596444270828742,
+      "l2_leaf_reg": 8.012737503998538,
+      "random_seed": 42,
+      "verbose": false,
+      "allow_writing_files": false,
+      "random_strength": 0.6974693032602092,
+      "bagging_temperature": 1.4607232426760908,
+      "border_count": 254
+    },
+    "threshold": 0.5,
+    "oof_accuracy": 0.861925,
+    "deploy_note": "soft:{'M1': 0.8, 'M2': 0.15, 'M4': 0.04999999999999996}",
+    "fusion_best": {
+      "kind": "linear",
+      "alpha": 0.975,
+      "beta": 0.025000000000000022,
+      "w": null,
+      "threshold": 0.5025,
+      "accuracy": 0.8619
+    },
+    "soft_best": {
+      "accuracy": 0.861925,
+      "threshold": 0.5,
+      "weights": {
+        "M1": 0.8,
+        "M2": 0.15,
+        "M4": 0.04999999999999996
+      }
+    },
+    "selection_rule": "max OOF accuracy among boosted feature sets + M1/M2 fusion",
+    "previous_oof_accuracy": 0.86185,
+    "previous_final_accuracy": 0.8528,
+    "mode": "boost_continue",
+    "accuracy": 0.8529,
+    "balanced_accuracy": 0.8522042442675389,
+    "precision_0": 0.8282387190684134,
+    "recall_0": 0.8962394172081118,
+    "f1_0": 0.8608983451536643,
+    "precision_1": 0.8829928952042628,
+    "recall_1": 0.808169071326966,
+    "f1_1": 0.8439257294429708,
+    "predicted_0_count": 5496,
+    "predicted_1_count": 4504,
+    "roc_auc": 0.9009605157831602,
+    "log_loss": 0.3752721270784676,
+    "majority_baseline_accuracy": 0.5079,
+    "accuracy_lift_vs_majority": 0.345,
+    "validation_note": "boost continue; final evaluated once after OOF lock"
+  },
+  "n_features": 22,
+  "boost": {
+    "previous_final": 0.8528,
+    "previous_oof": 0.86185,
+    "new_final": 0.8529,
+    "new_oof": 0.861925,
+    "top_candidates": [
+      {
+        "feature_set": "B+B_concern",
+        "n_features": 22,
+        "scheme": "soft",
+        "oof_accuracy": 0.861925,
+        "threshold": 0.5,
+        "fusion_kind": "",
+        "soft_weights": "{\"M1\": 0.8, \"M2\": 0.15, \"M4\": 0.04999999999999996}"
+      },
+      {
+        "feature_set": "B+B_concern",
+        "n_features": 22,
+        "scheme": "fusion",
+        "oof_accuracy": 0.8619,
+        "threshold": 0.5025,
+        "fusion_kind": "linear",
+        "soft_weights": ""
+      },
+      {
+        "feature_set": "B+B_concern",
+        "n_features": 22,
+        "scheme": "M1",
+        "oof_accuracy": 0.86185,
+        "threshold": 0.5,
+        "fusion_kind": "",
+        "soft_weights": ""
+      },
+      {
+        "feature_set": "union_concern_travel",
+        "n_features": 30,
+        "scheme": "soft",
+        "oof_accuracy": 0.861675,
+        "threshold": 0.5925,
+        "fusion_kind": "",
+        "soft_weights": "{\"M1\": 0.2, \"M2\": 0.8}"
+      },
+      {
+        "feature_set": "union_concern_travel",
+        "n_features": 30,
+        "scheme": "fusion",
+        "oof_accuracy": 0.861675,
+        "threshold": 0.5925,
+        "fusion_kind": "linear",
+        "soft_weights": ""
+      },
+      {
+        "feature_set": "B+T_travel",
+        "n_features": 26,
+        "scheme": "soft",
+        "oof_accuracy": 0.8616,
+        "threshold": 0.4925,
+        "fusion_kind": "",
+        "soft_weights": "{\"M1\": 0.45, \"M2\": 0.55}"
+      },
+      {
+        "feature_set": "B+T_travel",
+        "n_features": 26,
+        "scheme": "fusion",
+        "oof_accuracy": 0.8616,
+        "threshold": 0.4925,
+        "fusion_kind": "linear",
+        "soft_weights": ""
+      },
+      {
+        "feature_set": "B+B_concern",
+        "n_features": 22,
+        "scheme": "M2",
+        "oof_accuracy": 0.861575,
+        "threshold": 0.5,
+        "fusion_kind": "",
+        "soft_weights": ""
+      },
+      {
+        "feature_set": "histish_groups",
+        "n_features": 42,
+        "scheme": "fusion",
+        "oof_accuracy": 0.861575,
+        "threshold": 0.5075,
+        "fusion_kind": "linear",
+        "soft_weights": ""
+      },
+      {
+        "feature_set": "histish_groups",
+        "n_features": 42,
+        "scheme": "soft",
+        "oof_accuracy": 0.861575,
+        "threshold": 0.5075,
+        "fusion_kind": "",
+        "soft_weights": "{\"M1\": 0.65, \"M2\": 0.35}"
+      }
+    ]
+  }
+}
