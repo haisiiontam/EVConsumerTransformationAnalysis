@@ -61,21 +61,23 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=str,
         default="full",
         choices=["quick", "full"],
-        help="任务一运行模式：quick（冒烟）/ full（论文全量，默认）",
+        help="任务一/三运行模式：quick（冒烟）/ full（论文全量，默认）",
     )
-    parser.add_argument("--resume", action="store_true", help="任务一：断点续跑（冻结划分，跳过已完成阶段）")
-    parser.add_argument("--start-stage", type=str, default=None, help="任务一：从指定 stage 开始")
-    parser.add_argument("--stop-after-stage", type=str, default=None, help="任务一：在指定 stage 后停止")
-    parser.add_argument("--run-id", type=str, default=None, help="任务一：运行 ID（日志/run_state）")
-    parser.add_argument("--skip-optuna", action="store_true", help="任务一：跳过 Optuna 调参")
-    parser.add_argument("--skip-multiseed", action="store_true", help="任务一：跳过多 seed 稳定性")
-    parser.add_argument("--skip-shap", action="store_true", help="任务一：跳过 SHAP")
-    parser.add_argument("--audit-only", action="store_true", help="任务一：仅审计输出文件，不训练")
+    parser.add_argument("--resume", action="store_true", help="任务一/三：断点续跑（冻结划分，跳过已完成阶段）")
+    parser.add_argument("--start-stage", type=str, default=None, help="任务一/三：从指定 stage 开始")
+    parser.add_argument("--stop-after-stage", type=str, default=None, help="任务一/三：在指定 stage 后停止")
+    parser.add_argument("--run-id", type=str, default=None, help="任务一/三：运行 ID（日志/run_state）")
+    parser.add_argument("--skip-optuna", action="store_true", help="任务一/三：跳过 Optuna 调参")
+    parser.add_argument("--skip-multiseed", action="store_true", help="任务一/三：跳过多 seed 稳定性")
+    parser.add_argument("--skip-shap", action="store_true", help="任务一/三：跳过 SHAP")
+    parser.add_argument("--skip-deep", action="store_true", help="任务三：跳过深度/异构增强阶段")
+    parser.add_argument("--skip-robustness", action="store_true", help="任务三：跳过鲁棒性阶段")
+    parser.add_argument("--audit-only", action="store_true", help="任务一/三：仅审计输出文件，不训练")
     parser.add_argument(
         "--test",
         type=str,
         default=None,
-        help="可选独立测试集 CSV（仅任务二在最终验证后预测）",
+        help="可选独立测试集 CSV（任务二/三最终预测）",
     )
     parser.add_argument("--task2-folds", type=int, default=TASK2_N_FOLDS)
     parser.add_argument("--task2-alpha-step", type=float, default=TASK2_ALPHA_STEP)
@@ -192,8 +194,29 @@ def main(argv: list[str] | None = None) -> int:
         accuracies["ACC2"] = float(m2["accuracy"])
 
     if args.task in ("all", "task3"):
-        m3 = task3.run(df, output_dirs["task3"], test_size=args.test_size)
-        accuracies["ACC3"] = float(m3["accuracy"])
+        m3 = task3.run(
+            df,
+            output_dirs["task3"],
+            test_size=args.test_size,
+            mode=args.mode,
+            resume=args.resume,
+            start_stage=args.start_stage,
+            stop_after_stage=args.stop_after_stage,
+            run_id=args.run_id,
+            skip_optuna=args.skip_optuna,
+            skip_multiseed=args.skip_multiseed,
+            skip_shap=args.skip_shap,
+            skip_deep=args.skip_deep,
+            skip_robustness=args.skip_robustness,
+            audit_only=args.audit_only,
+            test_df=test_df,
+        )
+        if args.audit_only or (
+            isinstance(m3.get("accuracy"), float) and m3["accuracy"] != m3["accuracy"]
+        ):
+            accuracies["ACC3"] = None
+        else:
+            accuracies["ACC3"] = float(m3["accuracy"])
 
     weighted = save_overall_summary(accuracies, output_dirs["root"])
 

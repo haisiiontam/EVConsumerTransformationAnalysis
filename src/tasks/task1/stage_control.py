@@ -1,4 +1,4 @@
-"""Stage 调度：start/stop、skip、run_state 同步。"""
+"""Stage 调度：任务一专用 STAGES / skip 策略。"""
 
 from __future__ import annotations
 
@@ -6,7 +6,10 @@ import logging
 from dataclasses import dataclass, field
 from typing import Dict, Optional, Set
 
-from src.tasks.task1.io_utils import STAGES, RunState
+from src.common.io_utils import RunState
+from src.common.stage_control import StageGate as _StageGate
+from src.common.stage_control import completed_from_audit  # noqa: F401
+from src.tasks.task1.io_utils import STAGES
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +25,6 @@ class RunOptions:
     skip_multiseed: bool = False
     skip_shap: bool = False
     audit_only: bool = False
-    # 审计认定已完成、可跳过的 stage
     completed_stages: Set[str] = field(default_factory=set)
 
 
@@ -32,68 +34,74 @@ def stage_index(name: str) -> int:
     return STAGES.index(name)
 
 
+def _task1_skip(stage: str, opts: RunOptions) -> bool:
+    if stage in {"catboost_optuna", "catboost_confirmation", "lightgbm_optuna"} and opts.skip_optuna:
+        logger.info("skip stage=%s (--skip-optuna)", stage)
+        return True
+    if stage == "multiseed" and opts.skip_multiseed:
+        logger.info("skip stage=%s (--skip-multiseed)", stage)
+        return True
+    if stage == "shap" and opts.skip_shap:
+        logger.info("skip stage=%s (--skip-shap)", stage)
+        return True
+    return False
+
+
+_RESUME_SKIP = {
+    "split",
+    "baseline",
+    "ablation",
+    "feature_selection",
+    "catboost_optuna",
+    "catboost_confirmation",
+    "lightgbm_optuna",
+}
+
+
 class StageGate:
     def __init__(self, opts: RunOptions, state: RunState):
+        # 适配 common StageGate（opts 字段兼容）
+        from src.common.stage_control import RunOptions as CommonOpts
+
+        common_opts = CommonOpts(
+            mode=opts.mode,
+            resume=opts.resume,
+            start_stage=opts.start_stage,
+            stop_after_stage=opts.stop_after_stage,
+            run_id=opts.run_id,
+            skip_optuna=opts.skip_optuna,
+            skip_multiseed=opts.skip_multiseed,
+            skip_shap=opts.skip_shap,
+            audit_only=opts.audit_only,
+            completed_stages=opts.completed_stages,
+        )
         self.opts = opts
         self.state = state
-        self._start_i = stage_index(opts.start_stage) if opts.start_stage else 0
-        self._stop_i = stage_index(opts.stop_after_stage) if opts.stop_after_stage else len(STAGES) - 1
-        if self._stop_i < self._start_i:
-            raise ValueError("stop-after-stage 不能早于 start-stage")
-
-    def should_execute(self, stage: str) -> bool:
-        i = stage_index(stage)
-        if i < self._start_i or i > self._stop_i:
-            return False
-        if stage in {"catboost_optuna", "catboost_confirmation", "lightgbm_optuna"} and self.opts.skip_optuna:
-            logger.info("skip stage=%s (--skip-optuna)", stage)
-            return False
-        if stage == "multiseed" and self.opts.skip_multiseed:
-            logger.info("skip stage=%s (--skip-multiseed)", stage)
-            return False
-        if stage == "shap" and self.opts.skip_shap:
-            logger.info("skip stage=%s (--skip-shap)", stage)
-            return False
-        if self.opts.resume and stage in self.opts.completed_stages:
-            # 已完成且非 OOF 缺口阶段：跳过执行
-            if stage in {
-                "split",
-                "baseline",
-                "ablation",
-                "feature_selection",
-                "catboost_optuna",
-                "catboost_confirmation",
-                "lightgbm_optuna",
-            }:
-                logger.info("skip stage=%s (completed artifact from this full)", stage)
-                return False
-        return True
-
-    def begin(self, stage: str, expected=None, conf_hash: str = "") -> None:
-        logger.info(">>> STAGE BEGIN: %s", stage)
-        self.state.begin(stage, expected_artifacts=expected, configuration_hash=conf_hash)
-
-    def complete(self, stage: str, **extra) -> None:
-        logger.info("<<< STAGE COMPLETE: %s", stage)
-        self.state.complete(stage, **extra)
-
-    def fail(self, stage: str, err: str) -> None:
-        logger.error("!!! STAGE FAILED: %s | %s", stage, err)
-        self.state.fail(stage, err)
-
-    def partial(self, stage: str, error: str = "", **extra) -> None:
-        logger.warning("~~~ STAGE PARTIAL: %s | %s", stage, error)
-        self.state.partial(stage, error=error, **extra)
-
-    def past_stop(self, stage: str) -> bool:
-        return stage_index(stage) >= self._stop_i and not self.should_execute(
-            STAGES[min(stage_index(stage) + 1, len(STAGES) - 1)]
+        self._gate = _StageGate(
+            common_opts,
+            state,
+            STAGES,
+            skip_checker=lambda s, o: _task1_skip(s, opts),
+            resume_skip_stages=_RESUME_SKIP,
         )
 
+    def should_execute(self, stage: str) -> bool:
+        return self._gate.should_execute(stage)
 
-def completed_from_audit(audit: Dict) -> Set[str]:
-    out: Set[str] = set()
-    for name, info in (audit.get("stages") or {}).items():
-        if info.get("status") == "completed":
-            out.add(name)
-    return out
+    def begin(self, stage: str, expected=None, conf_hash: str = "") -> None:
+        self._gate.begin(stage, expected=expected, conf_hash=conf_hash)
+
+    def complete(self, stage: str, **extra) -> None:
+        self._gate.complete(stage, **extra)
+
+    def fail(self, stage: str, err: str) -> None:
+        self._gate.fail(stage, err)
+
+    def partial(self, stage: str, error: str = "", **extra) -> None:
+        self._gate.partial(stage, error=error, **extra)
+
+    def past_stop(self, stage: str) -> bool:
+        i = stage_index(stage)
+        return i >= self._gate._stop_i and not self.should_execute(
+            STAGES[min(i + 1, len(STAGES) - 1)]
+        )

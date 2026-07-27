@@ -308,6 +308,62 @@ TASK3_MECHANISM_FEATURES: List[str] = [
     "fuel_income_pressure",
 ]
 
+# 机制特征分组（全量优化消融用；分类输入仍禁止 range_anxiety_score）
+TASK3_MECH_GROUPS: Dict[str, List[str]] = {
+    "T_travel": [
+        "avg_daily_weekly_travel",
+        "travel_pressure",
+        "commute_share",
+        "weekly_minus_commute",
+        "long_trip_pressure",
+        "log_daily_commute",
+        "log_weekly_travel",
+        "commute_ratio",
+    ],
+    "C_charging": [
+        "charging_gap",
+        "charging_convenience",
+        "distance_access_interaction",
+        "log_station_distance",
+    ],
+    "K_cognition": [
+        "knowledge_deficit",
+        "knowledge_tech_gap",
+        "knowledge_tech_mean",
+        "knowledge_tech_interaction",
+        "experience_knowledge",
+    ],
+    "B_concern": [
+        "concern_knowledge_ratio",
+        "concern_tech_ratio",
+        "concern_knowledge_gap",
+        "concern_tech_gap",
+    ],
+    "BT_concern_travel": [
+        "concern_commute",
+        "concern_weekly_travel",
+        "charging_travel_pressure",
+        "distance_travel_interaction",
+    ],
+    "E_economy": [
+        "log_income",
+        "log_annual_income",
+        "monthly_income",
+        "fuel_income_pressure",
+        "fuel_monthly_income_ratio",
+    ],
+    "A_eco": [
+        "eco_tech_mean",
+        "eco_tech_interaction",
+        "eco_minus_tech",
+    ],
+    "D_demo": [
+        "vehicle_age_ratio",
+        "experience_age_interaction",
+        "vehicle_familiarity",
+    ],
+}
+
 TASK3_KNOWN_CATEGORICAL: List[str] = [
     "education_level",
     "city_type",
@@ -320,6 +376,45 @@ TASK3_THRESHOLD_MAX: float = 0.70
 TASK3_THRESHOLD_STEP: float = 0.005
 TASK3_EARLY_STOPPING_ROUNDS: int = 80
 TASK3_TIE_EPS: float = 0.0005
+TASK3_STABILITY_SEEDS: List[int] = [42, 52, 62]
+TASK3_OPTUNA_TRIALS_CB: int = 40
+TASK3_OPTUNA_TRIALS_LGB: int = 25
+TASK3_OPTUNA_COARSE_FOLDS: int = 3
+TASK3_ENABLE_GAM: bool = False
+TASK3_ENABLE_TABNET: bool = False
+TASK3_ENABLE_CROSS_TASK_AUX: bool = False
+
+TASK3_STAGES: List[str] = [
+    "audit",
+    "split",
+    "baseline",
+    "separability",
+    "feature_ablation",
+    "feature_selection",
+    "m1_catboost_classifier",
+    "m1_optuna",
+    "m2_catboost_regressor",
+    "m3_ordinal_score",
+    "m4_lightgbm",
+    "m5_xgboost",
+    "m6_extra_trees",
+    "m7_gam",
+    "m8_tabnet",
+    "cross_task_aux",
+    "diversity",
+    "classifier_regressor_fusion",
+    "soft_blend",
+    "stacking",
+    "calibration",
+    "threshold_postprocess",
+    "multiseed",
+    "robustness",
+    "final_lock",
+    "final_validation",
+    "shap",
+    "report",
+    "submission",
+]
 
 # 三个任务启动检查：至少包含官方基础字段
 REQUIRED_COLUMNS: List[str] = sorted(
