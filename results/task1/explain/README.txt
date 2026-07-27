@@ -1,10 +1,11 @@
-Task1 SHAP artifacts (CatBoost native ShapValues; 200 develop samples).
-Backend: catboost_native (avoids shap.TreeExplainer Windows native crash).
-Env used: .venv-shap (Python 3.12 via uv).
+Task1 SHAP artifacts (CatBoost native ShapValues; association ≠ causation).
+Backend: catboost_native. Explains M1 CatBoost (final submitter is soft_vote).
+n_samples=300 (stratified). top_feature=eco_tech_mean.
 
-Files:
-- shap_summary.png              global mean(|SHAP|) bar
-- shap_summary_beeswarm.png    optional (if shap package plot succeeds)
-- shap_dependence_<feat>.png   dependence for top feature (Medium class)
-- waterfall_typical_*.png      typical Low/Medium/High sample contributions
-- global_mean_abs_shap.csv     numeric importance table
+Core figures:
+- shap_summary.png / shap_summary_beeswarm.png / shap_by_class.png
+- shap_dependence_*_Medium/Low/High.png
+- waterfall_typical_{Low,Medium,High}.png
+- waterfall_typical_Medium_{borderline,confident}.png
+- waterfall_typical_Medium_as_{Low,High}.png  (misclassification cases)
+- global_mean_abs_shap.csv
