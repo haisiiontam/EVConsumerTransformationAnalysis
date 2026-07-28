@@ -1,4 +1,4 @@
-"""任务二论文 Markdown 自动生成。"""
+"""生成任务二论文用 Markdown 材料。"""
 
 from __future__ import annotations
 

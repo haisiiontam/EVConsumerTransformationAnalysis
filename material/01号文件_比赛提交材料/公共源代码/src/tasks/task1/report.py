@@ -1,4 +1,4 @@
-"""自动生成论文材料 Markdown。"""
+"""生成任务一论文用 Markdown 材料。"""
 
 from __future__ import annotations
 

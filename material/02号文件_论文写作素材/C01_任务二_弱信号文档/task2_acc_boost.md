@@ -2,7 +2,7 @@
 
 实验目录：`outputs/task2/diagnostics/acc_boost/`（精简副本：`results/task2/diagnostics/acc_boost/`）
 
-## 做了什么（提示词合法边界内）
+## 做了什么（合规边界内）
 
 1. **跨任务安全 OOF**：任务一采用倾向概率 + 任务三焦虑概率/评分预测（绝不用 `ev_adoption_likelihood` 真值作输入）
 2. **`range_anxiety_score` 消融**（uncertain 问卷字段）
@@ -25,4 +25,4 @@
 
 ## 结论
 
-在当前可观测字段下，ACC2 的信息上限贴近视类先验。继续堆模型无法诚实抬分；正式提交维持多数类 Bayes 决策（提示词情况 C）。
+在当前可观测字段下，ACC2 的信息上限贴近视类先验。继续堆模型无法诚实抬分；正式提交维持多数类 Bayes 决策。

@@ -550,7 +550,7 @@ python main.py --data dataSetB.csv --output outputs --task task1 --mode full --r
 ## Windows PowerShell background (after you confirm)
 
 ```powershell
-$Root = "E:\\cursorWorkSpace"
+$Root = (Get-Location).Path
 $RunId = "full_resume_1"
 $OutDir = Join-Path $Root "outputs\\task1"
 $LogDir = Join-Path $OutDir "logs"

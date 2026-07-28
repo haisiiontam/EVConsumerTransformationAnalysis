@@ -73,7 +73,7 @@ def persist_robustness(output_dir: Path, lc: pd.DataFrame, noise: pd.DataFrame) 
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     atomic_write_csv(output_dir / "learning_curve.csv", lc)
-    # also under diagnostics per prompt
+    # 同步写入 diagnostics 目录
     diag = output_dir.parent / "diagnostics"
     diag.mkdir(parents=True, exist_ok=True)
     atomic_write_csv(diag / "learning_curve.csv", lc)
