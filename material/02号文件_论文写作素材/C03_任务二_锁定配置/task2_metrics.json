@@ -1,0 +1,10 @@
+{
+  "task_name": "task2",
+  "accuracy": 0.6498,
+  "selected_scheme": "M",
+  "oof_accuracy": 0.64975,
+  "majority_baseline_accuracy": 0.64976,
+  "is_weak_signal_lock": true,
+  "threshold": 0.5,
+  "final_validation_accuracy": 0.6498
+}

@@ -1,0 +1,9 @@
+{
+  "best_k": 2,
+  "oof_accuracy": 0.64975,
+  "oof_roc_auc": 0.49596365098419504,
+  "k": 2,
+  "mean_silhouette": 0.11460785332393075,
+  "n_sil_folds": 5,
+  "note": "cluster fit on train fold only; rates beta-binomial smoothed"
+}

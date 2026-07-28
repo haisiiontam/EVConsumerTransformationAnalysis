@@ -1,0 +1,14 @@
+{
+  "alpha": 1.0,
+  "oof_accuracy": 0.64975,
+  "groups_1way": [
+    "city_type",
+    "education_level",
+    "current_vehicle_type",
+    "income_bin",
+    "vehicle_age_bin",
+    "station_distance_bin"
+  ],
+  "backoff": "2way->1way->global",
+  "seed": 42
+}

@@ -1,0 +1,65 @@
+{
+  "scheme": "boost_B+B_concern_soft",
+  "features": [
+    "daily_commute_km",
+    "weekly_travel_distance_km",
+    "charging_station_accessibility",
+    "ev_knowledge_score",
+    "battery_replacement_concern",
+    "environmental_awareness_score",
+    "technology_affinity_score",
+    "annual_income",
+    "age",
+    "education_level",
+    "city_type",
+    "current_vehicle_type",
+    "vehicle_age_years",
+    "fuel_expense_per_month",
+    "nearest_charging_station_km",
+    "electricity_cost_per_kwh",
+    "government_incentive_awareness",
+    "previous_ev_experience",
+    "concern_knowledge_ratio",
+    "concern_tech_ratio",
+    "concern_knowledge_gap",
+    "concern_tech_gap"
+  ],
+  "m1_params": {
+    "loss_function": "Logloss",
+    "eval_metric": "Accuracy",
+    "iterations": 619,
+    "depth": 6,
+    "learning_rate": 0.03596444270828742,
+    "l2_leaf_reg": 8.012737503998538,
+    "random_seed": 42,
+    "verbose": false,
+    "allow_writing_files": false,
+    "random_strength": 0.6974693032602092,
+    "bagging_temperature": 1.4607232426760908,
+    "border_count": 254
+  },
+  "threshold": 0.5,
+  "oof_accuracy": 0.861925,
+  "deploy_note": "soft:{'M1': 0.8, 'M2': 0.15, 'M4': 0.04999999999999996}",
+  "fusion_best": {
+    "kind": "linear",
+    "alpha": 0.975,
+    "beta": 0.025000000000000022,
+    "w": null,
+    "threshold": 0.5025,
+    "accuracy": 0.8619
+  },
+  "soft_best": {
+    "accuracy": 0.861925,
+    "threshold": 0.5,
+    "weights": {
+      "M1": 0.8,
+      "M2": 0.15,
+      "M4": 0.04999999999999996
+    }
+  },
+  "selection_rule": "max OOF accuracy among boosted feature sets + M1/M2 fusion",
+  "previous_oof_accuracy": 0.86185,
+  "previous_final_accuracy": 0.8528,
+  "mode": "boost_continue"
+}

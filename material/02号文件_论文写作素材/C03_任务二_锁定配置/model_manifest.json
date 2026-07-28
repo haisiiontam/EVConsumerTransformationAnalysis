@@ -1,0 +1,12 @@
+{
+  "scheme": "M",
+  "features": [
+    "city_type",
+    "nearest_charging_station_km",
+    "education_level",
+    "annual_income",
+    "vehicle_age_years"
+  ],
+  "threshold": null,
+  "weak_signal_lock": true
+}

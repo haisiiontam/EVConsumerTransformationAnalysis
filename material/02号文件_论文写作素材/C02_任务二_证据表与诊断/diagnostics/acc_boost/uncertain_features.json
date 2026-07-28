@@ -1,0 +1,7 @@
+{
+  "uncertain": [
+    "range_anxiety_score"
+  ],
+  "note": "range_anxiety_score is questionnaire field; ablation only until gate passes",
+  "allow_anxiety_ablation": true
+}

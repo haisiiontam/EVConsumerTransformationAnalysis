@@ -1,0 +1,14 @@
+{
+  "n_perm": 200,
+  "model": "logistic_l2_oof",
+  "observed_accuracy": 0.64975,
+  "observed_auc": 0.5065010591291494,
+  "observed_lift_vs_majority": 0.0,
+  "majority_accuracy": 0.64975,
+  "perm_auc_mean": 0.49885882309645807,
+  "perm_auc_std": 0.004238642967748722,
+  "p_value_auc_ge_observed": 0.035,
+  "p_value_lift_ge_observed": 1.0,
+  "supports_signal": false,
+  "note": "Association test under label permutation; not causation."
+}

@@ -1,0 +1,7 @@
+{
+  "task1_final_accuracy": 0.8601,
+  "task2_final_accuracy": 0.6498,
+  "task3_final_accuracy": 0.8529,
+  "weighted_score": 0.7731,
+  "formula": "0.2*ACC1 + 0.4*ACC2 + 0.4*ACC3"
+}

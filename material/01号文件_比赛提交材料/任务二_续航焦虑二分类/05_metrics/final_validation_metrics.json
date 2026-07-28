@@ -1,0 +1,21 @@
+{
+  "accuracy": 0.6498,
+  "balanced_accuracy": 0.5,
+  "precision_0": 0.0,
+  "recall_0": 0.0,
+  "f1_0": 0.0,
+  "precision_1": 0.6498,
+  "recall_1": 1.0,
+  "f1_1": 0.7877318462843981,
+  "predicted_0_count": 0,
+  "predicted_1_count": 10000,
+  "roc_auc": 0.5,
+  "log_loss": 12.095759512517775,
+  "pr_auc": 0.6498,
+  "brier": 0.3501999999999993,
+  "ece": 0.35019999999999885,
+  "specificity": 0.0,
+  "f1": 0.7877318462843981,
+  "locked_scheme": "M",
+  "threshold": 0.5
+}

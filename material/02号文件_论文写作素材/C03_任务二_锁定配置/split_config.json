@@ -1,0 +1,8 @@
+{
+  "test_size": 0.2,
+  "random_state": 42,
+  "n_folds": 5,
+  "stratify": true,
+  "n_develop": 40000,
+  "n_final": 10000
+}

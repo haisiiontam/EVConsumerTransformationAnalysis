@@ -1,0 +1,12 @@
+{
+  "n_duplicate_conflict_groups": 0,
+  "n_profile_bins": 71,
+  "knn_best_lift": -0.0027250000000000885,
+  "majority_baseline": {
+    "majority_class": 1,
+    "majority_class_count": 25990,
+    "majority_baseline_accuracy": 0.64975
+  },
+  "cleanlab_ran": false,
+  "note": "标签未修改；审计仅用于弱信号说明"
+}

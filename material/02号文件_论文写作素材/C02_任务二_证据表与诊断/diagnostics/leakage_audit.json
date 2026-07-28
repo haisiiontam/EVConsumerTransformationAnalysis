@@ -1,0 +1,17 @@
+{
+  "excluded": [
+    "home_charging_available",
+    "ev_adoption_likelihood",
+    "range_anxiety_score",
+    "monthly_energy_consumption_kwh",
+    "monthly_charging_cost"
+  ],
+  "leak_risk_probe_only": [
+    "monthly_energy_consumption_kwh",
+    "monthly_charging_cost",
+    "ev_adoption_likelihood",
+    "range_anxiety_score"
+  ],
+  "target": "home_charging_available",
+  "rule": "正式模型 X 禁止目标、任务一标签与后验费用字段"
+}

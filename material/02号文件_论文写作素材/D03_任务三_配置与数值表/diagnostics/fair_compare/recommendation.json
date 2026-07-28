@@ -1,0 +1,22 @@
+{
+  "same_split": true,
+  "note": "Historical archived Final 0.8534 used a different holdout; this table is the fair compare.",
+  "best_by_oof": {
+    "model": "current_M1",
+    "threshold_policy": "fixed",
+    "threshold": 0.5,
+    "oof_accuracy": 0.86185,
+    "final_accuracy": 0.8528
+  },
+  "current_M1_oof_tuned": {
+    "oof_threshold": 0.5,
+    "oof_accuracy": 0.86185,
+    "final_accuracy": 0.8528
+  },
+  "hist_clf_best_hp_oof_tuned": {
+    "oof_threshold": 0.495,
+    "oof_accuracy": 0.861425,
+    "final_accuracy": 0.853
+  },
+  "previous_locked_final_accuracy": 0.8528
+}

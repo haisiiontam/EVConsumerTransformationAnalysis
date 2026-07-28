@@ -1,0 +1,28 @@
+{
+  "selected": "B+B_concern",
+  "features": [
+    "daily_commute_km",
+    "weekly_travel_distance_km",
+    "charging_station_accessibility",
+    "ev_knowledge_score",
+    "battery_replacement_concern",
+    "environmental_awareness_score",
+    "technology_affinity_score",
+    "annual_income",
+    "age",
+    "education_level",
+    "city_type",
+    "current_vehicle_type",
+    "vehicle_age_years",
+    "fuel_expense_per_month",
+    "nearest_charging_station_km",
+    "electricity_cost_per_kwh",
+    "government_incentive_awareness",
+    "previous_ev_experience",
+    "concern_knowledge_ratio",
+    "concern_tech_ratio",
+    "concern_knowledge_gap",
+    "concern_tech_gap"
+  ],
+  "oof_accuracy": 0.861775
+}
