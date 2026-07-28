@@ -1,5 +1,3 @@
-"""鲁棒性与学习曲线（轻量实现）。"""
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -73,12 +71,12 @@ def persist_robustness(output_dir: Path, lc: pd.DataFrame, noise: pd.DataFrame) 
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     atomic_write_csv(output_dir / "learning_curve.csv", lc)
-    # 同步写入 diagnostics 目录
+
     diag = output_dir.parent / "diagnostics"
     diag.mkdir(parents=True, exist_ok=True)
     atomic_write_csv(diag / "learning_curve.csv", lc)
     atomic_write_csv(output_dir / "noise_sensitivity.csv", noise)
-    # placeholders
+
     atomic_write_csv(
         output_dir / "feature_dropout.csv",
         pd.DataFrame([{"note": "see ablation for group dropout"}]),

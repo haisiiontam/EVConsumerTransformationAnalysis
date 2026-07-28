@@ -1,23 +1,19 @@
-"""项目配置：任务定义、特征列表、模型参数与评分权重。"""
-
 from __future__ import annotations
 
 from typing import Any, Dict, List
 
-# 随机种子，保证可复现
+
 RANDOM_SEED: int = 42
 
-# 默认验证集比例
+
 DEFAULT_TEST_SIZE: float = 0.2
 
-# ---------------------------------------------------------------------------
-# 任务一：电动汽车采用意愿分类（三分类，优化版）
-# ---------------------------------------------------------------------------
+
 TASK1_NAME: str = "task1"
 TASK1_TARGET: str = "ev_adoption_likelihood"
 TASK1_LABEL_ORDER: List[str] = ["Low", "Medium", "High"]
 
-# 官方建议特征（配置 A 对照）
+
 TASK1_FEATURES: List[str] = [
     "annual_income",
     "education_level",
@@ -28,7 +24,7 @@ TASK1_FEATURES: List[str] = [
 ]
 TASK1_OFFICIAL_FEATURES: List[str] = list(TASK1_FEATURES)
 
-# 可分性分析确认的强信号特征
+
 TASK1_STRONG_FEATURES: List[str] = [
     "ev_knowledge_score",
     "range_anxiety_score",
@@ -37,7 +33,7 @@ TASK1_STRONG_FEATURES: List[str] = [
     "annual_income",
 ]
 
-# 安全扩展候选（缺失则跳过）
+
 TASK1_SAFE_CANDIDATE_FEATURES: List[str] = [
     "annual_income",
     "education_level",
@@ -61,9 +57,9 @@ TASK1_SAFE_CANDIDATE_FEATURES: List[str] = [
 ]
 
 TASK1_EXCLUDED_FEATURES: List[str] = [
-    "ev_adoption_likelihood",  # 目标
-    "home_charging_available",  # 任务二目标
-    "monthly_energy_consumption_kwh",  # 潜在后验
+    "ev_adoption_likelihood",
+    "home_charging_available",
+    "monthly_energy_consumption_kwh",
     "monthly_charging_cost",
 ]
 
@@ -77,7 +73,7 @@ TASK1_MECHANISM_FEATURES: List[str] = [
     "commute_ratio",
 ]
 
-# 论文增强版机制分组（C1–C6）
+
 TASK1_MECH_GROUPS: Dict[str, List[str]] = {
     "C1_economy": [
         "log_annual_income",
@@ -134,14 +130,12 @@ TASK1_OPTUNA_TRIALS_CB: int = 40
 TASK1_OPTUNA_TRIALS_LGB: int = 25
 TASK1_OPTUNA_COARSE_FOLDS: int = 3
 
-# ---------------------------------------------------------------------------
-# 任务二：家庭充电条件预测（二分类）——优化版
-# ---------------------------------------------------------------------------
+
 TASK2_NAME: str = "task2"
 TASK2_TARGET: str = "home_charging_available"
 TASK2_LABEL_ORDER: List[str] = ["0", "1"]
 
-# 官方基础特征（必须存在）
+
 TASK2_BASE_FEATURES: List[str] = [
     "city_type",
     "nearest_charging_station_km",
@@ -150,7 +144,7 @@ TASK2_BASE_FEATURES: List[str] = [
     "vehicle_age_years",
 ]
 
-# 安全扩展候选特征（缺失则跳过并警告）
+
 TASK2_SAFE_CANDIDATE_FEATURES: List[str] = [
     "age",
     "annual_income",
@@ -172,7 +166,7 @@ TASK2_SAFE_CANDIDATE_FEATURES: List[str] = [
     "previous_ev_experience",
 ]
 
-# 绝对排除（目标或潜在后验信息）——正式模型禁用
+
 TASK2_EXCLUDED_FEATURES: List[str] = [
     "home_charging_available",
     "ev_adoption_likelihood",
@@ -181,7 +175,7 @@ TASK2_EXCLUDED_FEATURES: List[str] = [
     "monthly_charging_cost",
 ]
 
-# 仅用于泄露风险探查（绝不进正式模型）
+
 TASK2_LEAK_RISK_PROBE_FEATURES: List[str] = [
     "monthly_energy_consumption_kwh",
     "monthly_charging_cost",
@@ -189,14 +183,14 @@ TASK2_LEAK_RISK_PROBE_FEATURES: List[str] = [
     "range_anxiety_score",
 ]
 
-# 机制 / 住房充电代理特征名
+
 TASK2_MECHANISM_FEATURES: List[str] = [
     "charging_gap_index",
     "charging_convenience_index",
     "commute_ratio",
     "fuel_income_pressure",
     "replacement_pressure",
-    # 住房/充电条件代理（行内可算）
+
     "log_annual_income",
     "city_is_urban",
     "city_is_suburban",
@@ -209,16 +203,16 @@ TASK2_MECHANISM_FEATURES: List[str] = [
     "income_over_near",
     "electricity_x_income",
     "noncommute_km",
-    # 需训练集分位数的相对特征（在 preprocessor 中生成）
+
     "income_ge_train_median",
     "urban_high_income",
     "suburban_high_income",
 ]
 
-# 弱信号：最大 |AUC-0.5| 低于该阈值则触发弱信号协议
+
 TASK2_WEAK_SIGNAL_AUC_GAP: float = 0.02
 
-# 诊断用类别特征
+
 TASK2_DIAG_CATEGORICAL: List[str] = [
     "city_type",
     "education_level",
@@ -226,7 +220,7 @@ TASK2_DIAG_CATEGORICAL: List[str] = [
     "previous_ev_experience",
 ]
 
-# 任务二已知类别特征（结合 dtype 再识别）
+
 TASK2_KNOWN_CATEGORICAL: List[str] = [
     "education_level",
     "city_type",
@@ -234,7 +228,7 @@ TASK2_KNOWN_CATEGORICAL: List[str] = [
     "previous_ev_experience",
 ]
 
-# 任务二 OOF / 搜索默认参数
+
 TASK2_N_FOLDS: int = 5
 TASK2_ALPHA_STEP: float = 0.05
 TASK2_THRESHOLD_MIN: float = 0.30
@@ -246,14 +240,14 @@ TASK2_STABILITY_SEEDS: List[int] = [42, 52, 62]
 TASK2_ENABLE_TABNET: bool = False
 TASK2_ENABLE_CROSS_TASK_AUX: bool = True
 TASK2_ENABLE_CLUSTERING: bool = True
-# 问卷原字段：ACC 冲高消融可临时纳入；默认正式排除列表仍含 range_anxiety_score
+
 TASK2_ALLOW_ANXIETY_ABLATION: bool = True
 TASK2_UNCERTAIN_FEATURES: List[str] = ["range_anxiety_score"]
 TASK2_PERMUTATION_N: int = 200
 TASK2_BOOTSTRAP_N: int = 1000
 TASK2_ACC_BOOST_MIN_LIFT: float = 0.0005
 
-# 任务二阶段（弱信号诊断与稳健决策）
+
 TASK2_STAGES: List[str] = [
     "audit",
     "split",
@@ -287,15 +281,13 @@ TASK2_STAGES: List[str] = [
     "submission",
 ]
 
-# ---------------------------------------------------------------------------
-# 任务三：里程焦虑敏感度识别（优化版）
-# ---------------------------------------------------------------------------
+
 TASK3_NAME: str = "task3"
 TASK3_SOURCE_SCORE: str = "range_anxiety_score"
-TASK3_THRESHOLD: float = 5.0  # >5 -> 1，否则 0
+TASK3_THRESHOLD: float = 5.0
 TASK3_LABEL_ORDER: List[str] = ["0", "1"]
 
-# 官方建议特征（配置 A 基线对照）
+
 TASK3_FEATURES: List[str] = [
     "daily_commute_km",
     "weekly_travel_distance_km",
@@ -305,7 +297,7 @@ TASK3_FEATURES: List[str] = [
 ]
 TASK3_OFFICIAL_FEATURES: List[str] = list(TASK3_FEATURES)
 
-# 可分性分析确认的强信号特征（必须优先纳入）
+
 TASK3_STRONG_FEATURES: List[str] = [
     "environmental_awareness_score",
     "ev_knowledge_score",
@@ -313,7 +305,7 @@ TASK3_STRONG_FEATURES: List[str] = [
     "annual_income",
 ]
 
-# 安全扩展候选（缺失则跳过；禁止使用其他任务目标与标签源）
+
 TASK3_SAFE_CANDIDATE_FEATURES: List[str] = [
     "daily_commute_km",
     "weekly_travel_distance_km",
@@ -336,10 +328,10 @@ TASK3_SAFE_CANDIDATE_FEATURES: List[str] = [
 ]
 
 TASK3_EXCLUDED_FEATURES: List[str] = [
-    "range_anxiety_score",  # 标签源
-    "home_charging_available",  # 任务二目标
-    "ev_adoption_likelihood",  # 任务一目标
-    "monthly_energy_consumption_kwh",  # 潜在后验
+    "range_anxiety_score",
+    "home_charging_available",
+    "ev_adoption_likelihood",
+    "monthly_energy_consumption_kwh",
     "monthly_charging_cost",
 ]
 
@@ -352,7 +344,7 @@ TASK3_MECHANISM_FEATURES: List[str] = [
     "fuel_income_pressure",
 ]
 
-# 机制特征分组（全量优化消融用；分类输入仍禁止 range_anxiety_score）
+
 TASK3_MECH_GROUPS: Dict[str, List[str]] = {
     "T_travel": [
         "avg_daily_weekly_travel",
@@ -460,7 +452,7 @@ TASK3_STAGES: List[str] = [
     "submission",
 ]
 
-# 三个任务启动检查：至少包含官方基础字段
+
 REQUIRED_COLUMNS: List[str] = sorted(
     set(
         TASK1_FEATURES
@@ -472,16 +464,13 @@ REQUIRED_COLUMNS: List[str] = sorted(
     )
 )
 
-# 任务一/三用到的已知类别特征
+
 KNOWN_CATEGORICAL_FEATURES: List[str] = [
     "education_level",
     "city_type",
 ]
 
-# ---------------------------------------------------------------------------
-# CatBoost 参数
-# ---------------------------------------------------------------------------
-# 任务一 / 任务三：保持原基线参数，结果可复现
+
 CATBOOST_BASELINE_COMMON: Dict[str, Any] = {
     "iterations": 300,
     "depth": 6,
@@ -497,7 +486,7 @@ TASK1_MODEL_PARAMS: Dict[str, Any] = {
     "eval_metric": "Accuracy",
 }
 
-# 任务一优化版参数
+
 TASK1_CATBOOST_COMMON: Dict[str, Any] = {
     "loss_function": "MultiClass",
     "eval_metric": "Accuracy",
@@ -510,14 +499,14 @@ TASK1_CATBOOST_COMMON: Dict[str, Any] = {
     "allow_writing_files": False,
 }
 
-# 任务三旧基线参数（配置 A 对照仍可用）
+
 TASK3_MODEL_PARAMS: Dict[str, Any] = {
     **CATBOOST_BASELINE_COMMON,
     "loss_function": "Logloss",
     "eval_metric": "Accuracy",
 }
 
-# 任务三优化版参数
+
 TASK3_CATBOOST_COMMON: Dict[str, Any] = {
     "loss_function": "Logloss",
     "eval_metric": "Accuracy",
@@ -530,7 +519,7 @@ TASK3_CATBOOST_COMMON: Dict[str, Any] = {
     "allow_writing_files": False,
 }
 
-# 任务二优化版参数
+
 TASK2_CATBOOST_COMMON: Dict[str, Any] = {
     "loss_function": "Logloss",
     "eval_metric": "Accuracy",
@@ -543,11 +532,11 @@ TASK2_CATBOOST_COMMON: Dict[str, Any] = {
     "allow_writing_files": False,
 }
 
-# 兼容旧命名（任务二基线配置 A 可对照）
+
 TASK2_MODEL_PARAMS: Dict[str, Any] = dict(TASK2_CATBOOST_COMMON)
 TASK2_FEATURES: List[str] = list(TASK2_BASE_FEATURES)
 
-# 官方评分权重（仅用于综合分，不参与单条概率）
+
 SCORE_WEIGHTS: Dict[str, float] = {
     "ACC1": 0.2,
     "ACC2": 0.4,

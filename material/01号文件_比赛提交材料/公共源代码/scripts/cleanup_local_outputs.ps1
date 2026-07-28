@@ -1,5 +1,3 @@
-# 可选：本地清理臃肿 outputs（已复制到 results/ 的不要再依赖这些）
-# 在仓库根目录 PowerShell 执行
 
 $paths = @(
   'outputs\task1\checkpoints','outputs\task1\oof','outputs\task1\logs','outputs\task1\resume_audit','outputs\task1\paper',

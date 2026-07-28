@@ -1,5 +1,3 @@
-"""M2：原始评分回归分支 → 阈值化分类 / 分数转概率。"""
-
 from __future__ import annotations
 
 import logging
@@ -76,7 +74,7 @@ def oof_regression_score(
         )
         ps = model.predict(transform_cat(X_dev.loc[va], state))
         pred_score[va] = ps
-        # 临时用 5.5 阈值生成概率占位
+
         p1 = _sigmoid(ps, 5.5, 1.0)
         save_fold_checkpoint(
             ckpt_dir,
@@ -94,7 +92,7 @@ def oof_regression_score(
             pred_score=ps,
         )
 
-    # 阈值搜索（评分空间）
+
     thr_rows = []
     best_thr, best_acc = 5.5, -1.0
     for thr in np.round(np.arange(4.0, 7.0 + 1e-12, 0.05), 10):
@@ -104,7 +102,7 @@ def oof_regression_score(
         if acc > best_acc:
             best_acc, best_thr = acc, float(thr)
 
-    # score -> prob 映射（OOF 安全：简单全局拟合即可作论文对照；正式融合用 sigmoid）
+
     p_sig = _sigmoid(pred_score, best_thr, 0.8)
     try:
         lr = LogisticRegression(max_iter=200)
@@ -119,7 +117,7 @@ def oof_regression_score(
     except Exception:
         p_iso = p_sig
 
-    # 选 Acc 最高的映射
+
     cands = {
         "sigmoid": p_sig,
         "logistic": p_lr,
@@ -162,7 +160,7 @@ def persist_m2_outputs(oof: pd.DataFrame, info: Dict[str, Any], thr_df: pd.DataF
     atomic_write_csv(output_dir / "models" / "m2_regression_oof.csv", oof)
     atomic_write_csv(output_dir / "tuning" / "m2_regression_threshold.csv", thr_df)
     atomic_write_json(output_dir / "tuning" / "m2_score_to_probability.json", info)
-    # 评分分层
+
     rows = []
     for s in range(1, 11):
         m = oof["true_score"].round().astype(int) == s

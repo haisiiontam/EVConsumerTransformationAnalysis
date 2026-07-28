@@ -1,5 +1,3 @@
-"""数据读取、字段检查、概览统计与输出目录管理。"""
-
 from __future__ import annotations
 
 import logging
@@ -55,7 +53,7 @@ def read_csv_compatible(data_path: Path) -> pd.DataFrame:
             )
             logger.info("全部字段名：%s", list(df.columns))
             return df
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             last_error = exc
             logger.warning("使用编码 %s 读取失败：%s", encoding, exc)
 

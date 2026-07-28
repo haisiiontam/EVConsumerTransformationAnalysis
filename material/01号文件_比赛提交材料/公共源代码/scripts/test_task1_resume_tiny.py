@@ -1,5 +1,3 @@
-"""极小样本：验证 fold checkpoint 原子写入与 resume 跳过已完成折。"""
-
 from __future__ import annotations
 
 import tempfile
@@ -46,7 +44,7 @@ def main() -> None:
             resume_folds=True,
         )
         assert all(fold_is_complete(ckpt, i) for i in range(3))
-        # 第二次应全部从 checkpoint 恢复
+
         oof2, pred2, rows2, _ = oof_catboost_multiclass(
             df,
             y_s,

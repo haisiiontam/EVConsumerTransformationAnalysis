@@ -1,4 +1,3 @@
-"""任务三推理：M1/M2 soft 融合（M4 权重并入归一化）"""
 from __future__ import annotations
 
 import argparse
@@ -34,7 +33,7 @@ from src.tasks.task3.preprocessing import transform_cat
 
 
 def score_to_prob(score: np.ndarray, thr: float = 0.5) -> np.ndarray:
-    # 将回归分近似映射到 [0,1]：以阈值附近 logistic 形状近似
+
     x = (score - thr) / 0.15
     return 1.0 / (1.0 + np.exp(-x))
 
@@ -49,7 +48,7 @@ def main() -> int:
     bundle = json.loads((md / "task3_model_bundle.json").read_text(encoding="utf-8"))
     thr = float(bundle.get("threshold", 0.5))
     w = dict(bundle.get("soft_weights") or {"M1": 0.8, "M2": 0.15})
-    # 部署包未单独导出 M4 时，将其权重并入 M1
+
     w_m1 = float(w.get("M1", 0.8)) + float(w.get("M4", 0.0))
     w_m2 = float(w.get("M2", 0.15))
     wsum = w_m1 + w_m2

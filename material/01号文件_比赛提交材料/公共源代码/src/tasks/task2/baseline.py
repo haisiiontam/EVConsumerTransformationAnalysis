@@ -1,5 +1,3 @@
-"""任务二基线：B0 折内多数类 / B1 常数先验 / B2 官方五特征 CatBoost。"""
-
 from __future__ import annotations
 
 import logging
@@ -251,7 +249,7 @@ def run_baselines(
         X_dev, y_dev, fold_assign, n_folds, ckpt_root / "B2", TASK2_BASE_FEATURES
     )
 
-    # 汇总 metrics
+
     rows = []
     for name, oof, folds in [
         ("B0_majority", oof_b0, folds_b0),
@@ -276,7 +274,7 @@ def run_baselines(
             "seed": seed,
         },
     )
-    # 兼容 task3 命名
+
     atomic_write_csv(baseline_dir / "baseline_oof_predictions.csv", oof_b0)
     logger.info("task2 baselines done: B0 acc=%.4f B2 acc=%.4f", rows[0]["accuracy"], rows[2]["accuracy"])
     return {

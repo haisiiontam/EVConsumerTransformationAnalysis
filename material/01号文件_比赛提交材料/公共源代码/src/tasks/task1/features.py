@@ -1,5 +1,3 @@
-"""任务一特征：官方 / 安全扩展 / C1–C6 机制组。"""
-
 from __future__ import annotations
 
 import logging

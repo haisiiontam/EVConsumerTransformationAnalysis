@@ -1,7 +1,6 @@
-"""SHAP 与论文图表（关联解释，非因果）。
-
-任务一为三分类有序问题：重点解释 Medium 边界与分班级贡献差异。
-"""
+\
+\
+\
 
 from __future__ import annotations
 
@@ -12,7 +11,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from catboost import CatBoostClassifier
@@ -29,7 +28,7 @@ try:
     HAS_SHAP = True
 except ImportError:
     HAS_SHAP = False
-    shap = None  # type: ignore
+    shap = None
 
 C_POS = "#C44E52"
 C_NEG = "#4C72B0"
@@ -101,7 +100,7 @@ def _catboost_shap_values(
     raw = np.asarray(model.get_feature_importance(data=pool, type="ShapValues"))
     if raw.ndim == 3:
         base = raw[:, :, -1].mean(axis=0)
-        shap_3d = np.transpose(raw[:, :, :-1], (0, 2, 1))  # (n, f, c)
+        shap_3d = np.transpose(raw[:, :, :-1], (0, 2, 1))
     elif raw.ndim == 2:
         base = np.array([raw[:, -1].mean()])
         shap_3d = raw[:, :-1][:, :, None]
@@ -176,7 +175,7 @@ def _plot_beeswarm(Xs: pd.DataFrame, shap_3d: np.ndarray, output_dir: Path) -> b
         plt.savefig(output_dir / "shap_summary_beeswarm.png", dpi=220, bbox_inches="tight")
         plt.close("all")
         return True
-    except Exception as e:  # pragma: no cover
+    except Exception as e:
         logger.warning("SHAP beeswarm 跳过：%s", e)
         plt.close("all")
         return False
@@ -267,15 +266,15 @@ def _pick_typical_indices(
         score = shap_3d[hits, :, cidx].sum(axis=1)
         out[lab] = int(hits[int(np.argmax(score))])
 
-    # Medium 边界：真实 Medium，且预测概率最接近相邻类
+
     med_idx = np.where(ys == "Medium")[0]
     if len(med_idx) and proba is not None and proba.shape[1] >= 3:
         p = proba[med_idx]
-        # margin to nearest rival (Low or High)
+
         rival = np.maximum(p[:, 0], p[:, 2])
         margin = p[:, 1] - rival
         out["Medium_borderline"] = int(med_idx[int(np.argmin(margin))])
-        # 高置信 Medium
+
         out["Medium_confident"] = int(med_idx[int(np.argmax(p[:, 1]))])
     return out
 
@@ -299,7 +298,7 @@ def _plot_medium_error_waterfalls(
         hits = np.where((ys == "Medium") & (pred == wrong))[0]
         if len(hits) == 0:
             continue
-        # 选 Medium 概率相对较高但仍被判错的（更像边界误判）
+
         i = int(hits[int(np.argmax(proba[hits, med_c]))])
         label = f"Medium_as_{wrong}"
         _plot_waterfall_bar(
@@ -318,7 +317,7 @@ def _stratified_sample(y_n: np.ndarray, max_samples: int, rng: np.random.RandomS
     idx = np.arange(len(y_n))
     if len(idx) <= max_samples:
         return idx
-    # 每类尽量均分
+
     per = max(max_samples // max(len(TASK1_LABEL_ORDER), 1), 1)
     chosen: List[int] = []
     for lab in TASK1_LABEL_ORDER:
@@ -357,10 +356,10 @@ def _run_shap_analysis_impl(
     shap_3d, base_values, backend = _catboost_shap_values(model, Xs, cat_feature_indices)
     info["backend"] = backend
 
-    # 预测概率（用于边界/误判选样）
+
     try:
         proba = np.asarray(model.predict_proba(Xs), dtype=float)
-        # 对齐类别顺序
+
         classes = [str(c) for c in model.classes_]
         order = [classes.index(lab) if lab in classes else i for i, lab in enumerate(TASK1_LABEL_ORDER)]
         if list(order) != list(range(len(order))):
@@ -379,13 +378,13 @@ def _run_shap_analysis_impl(
     try:
         _plot_global_bar(fi, output_dir)
         info["figures"].append("shap_summary.png")
-    except Exception as e:  # pragma: no cover
+    except Exception as e:
         logger.warning("SHAP summary 绘图失败：%s", e)
 
     try:
         _plot_class_compare(fi, output_dir)
         info["figures"].append("shap_by_class.png")
-    except Exception as e:  # pragma: no cover
+    except Exception as e:
         logger.warning("class compare 失败：%s", e)
 
     if _plot_beeswarm(Xs, shap_3d, output_dir):
@@ -393,12 +392,12 @@ def _run_shap_analysis_impl(
 
     top_feats = [str(f) for f in fi.head(4)["feature"]]
     color_feat = top_feats[1] if len(top_feats) > 1 else None
-    # Medium dependence for top features + Low/High for top1
+
     for feat in top_feats:
         try:
             _plot_dependence(Xs, shap_3d, feat, class_idx=1, output_dir=output_dir, color_feat=color_feat)
             info["figures"].append(f"shap_dependence_{_safe_name(feat)}_Medium.png")
-        except Exception as e:  # pragma: no cover
+        except Exception as e:
             logger.warning("dependence Medium %s: %s", feat, e)
     if top_feats:
         for cidx, lab in ((0, "Low"), (2, "High")):
@@ -412,10 +411,10 @@ def _run_shap_analysis_impl(
                     color_feat=color_feat,
                 )
                 info["figures"].append(f"shap_dependence_{_safe_name(top_feats[0])}_{lab}.png")
-            except Exception as e:  # pragma: no cover
+            except Exception as e:
                 logger.warning("dependence %s: %s", lab, e)
 
-    # 兼容旧文件名：保留 top1 Medium 的无后缀副本
+
     if top_feats:
         try:
             _plot_dependence(
@@ -458,17 +457,17 @@ def _run_shap_analysis_impl(
                     subtitle=f"y=Medium",
                 )
                 info["figures"].append(f"waterfall_typical_{lab}.png")
-        except Exception as e:  # pragma: no cover
+        except Exception as e:
             logger.warning("waterfall %s: %s", lab, e)
 
     if proba is not None:
         try:
             err_figs = _plot_medium_error_waterfalls(Xs, ys, shap_3d, base_values, proba, output_dir)
             info["figures"].extend(err_figs)
-        except Exception as e:  # pragma: no cover
+        except Exception as e:
             logger.warning("medium error waterfalls: %s", e)
 
-    # README
+
     readme = "\n".join(
         [
             "Task1 SHAP artifacts (CatBoost native ShapValues; association ≠ causation).",

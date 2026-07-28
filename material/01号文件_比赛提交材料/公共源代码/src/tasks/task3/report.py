@@ -1,5 +1,3 @@
-"""生成任务三论文用 Markdown 材料。"""
-
 from __future__ import annotations
 
 from pathlib import Path

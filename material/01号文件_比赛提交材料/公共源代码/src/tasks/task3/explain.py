@@ -1,5 +1,3 @@
-"""任务三可解释性：CatBoost 原生 SHAP + 多图套件。"""
-
 from __future__ import annotations
 
 import logging
@@ -9,7 +7,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from catboost import CatBoostClassifier, Pool
@@ -22,13 +20,13 @@ try:
     import shap
 
     HAS_SHAP = True
-except Exception:  # pragma: no cover
-    shap = None  # type: ignore
+except Exception:
+    shap = None
     HAS_SHAP = False
 
-# 论文友好配色（避免紫系）
-C_POS = "#C44E52"  # 推高焦虑概率
-C_NEG = "#4C72B0"  # 压低焦虑概率
+
+C_POS = "#C44E52"
+C_NEG = "#4C72B0"
 C_MAIN = "#2F6F8F"
 C_ACCENT = "#E8A838"
 
@@ -65,11 +63,11 @@ def _catboost_shap_values(
     pool = Pool(Xs_pool, cat_features=cat_idx or None)
     raw = np.asarray(model.get_feature_importance(data=pool, type="ShapValues"))
     if raw.ndim == 2:
-        # binary: (n, f+1)
+
         shap_vals = raw[:, :-1]
         base = float(np.mean(raw[:, -1]))
     elif raw.ndim == 3:
-        # multiclass-like: (n, c, f+1) → 取 class 1
+
         cidx = 1 if raw.shape[1] > 1 else 0
         shap_vals = raw[:, cidx, :-1]
         base = float(np.mean(raw[:, cidx, -1]))
@@ -126,7 +124,7 @@ def _plot_beeswarm(Xs: pd.DataFrame, shap_vals: np.ndarray, output_dir: Path) ->
         plt.savefig(output_dir / "shap_summary_beeswarm.png", dpi=220, bbox_inches="tight")
         plt.close("all")
         return True
-    except Exception as e:  # pragma: no cover
+    except Exception as e:
         logger.warning("SHAP beeswarm skipped: %s", e)
         plt.close("all")
         return False
@@ -261,7 +259,7 @@ def _pick_typical_indices(shap_vals: np.ndarray, y: np.ndarray) -> Dict[str, int
         out["high"] = int(high[np.argmax(total[high])])
     if len(low):
         out["low"] = int(low[np.argmin(total[low])])
-    # 边界：|sum SHAP| 最小
+
     out["borderline"] = int(np.argmin(np.abs(total)))
     return out
 
@@ -282,7 +280,7 @@ def run_shap_analysis(
         rng = np.random.RandomState(42)
         idx = np.arange(len(X_trans))
         if len(idx) > max_samples:
-            # 分层抽样，保证两类都有
+
             pos = idx[y_arr == 1]
             neg = idx[y_arr == 0]
             n_pos = min(len(pos), max_samples // 2)
@@ -337,13 +335,13 @@ def run_shap_analysis(
                     color_feat=color_feat if feat != color_feat else (top_feats[0] if top_feats else None),
                 )
                 info["figures"].append(f"shap_dependence_{_safe_name(feat)}.png")
-            except Exception as e:  # pragma: no cover
+            except Exception as e:
                 logger.warning("dependence %s failed: %s", feat, e)
 
         try:
             _plot_class_compare(Xs, shap_vals, ys, fi, output_dir, top_k=10)
             info["figures"].append("shap_by_class.png")
-        except Exception as e:  # pragma: no cover
+        except Exception as e:
             logger.warning("class compare failed: %s", e)
 
         try:
@@ -354,7 +352,7 @@ def run_shap_analysis(
                 _plot_waterfall_bar(names, shap_vals[i], base, label, output_dir, subtitle=sub)
                 info["figures"].append(f"waterfall_typical_{label}.png")
             info["typical_indices"] = {k: int(idx[v]) for k, v in picks.items()}
-        except Exception as e:  # pragma: no cover
+        except Exception as e:
             logger.warning("waterfall failed: %s", e)
 
         info["top_feature"] = str(fi.iloc[0]["feature"]) if len(fi) else None

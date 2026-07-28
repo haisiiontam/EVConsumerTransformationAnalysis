@@ -1,0 +1,14 @@
+# 请填写后保存（全文替换占位符）
+
+题号（A/B）：B
+队伍编号（报名系统显示的完整编号，形如 DATA26xxxxxx）：DATA26XXXXXX
+
+替换规则：
+1. 将本文件中的 DATA26XXXXXX 改为真实队伍编号；
+2. 在 03号文件_官网上传三件套 内全局搜索 DATA26XXXXXX 并替换；
+3. 论文页眉示例：Team# DATA26XXXXXX page k of n
+4. 最终上传文件名：
+   - 论文：BDATA26XXXXXX.pdf
+   - 承诺书：BDATA26XXXXXXcns.pdf（或 .jpg/.png）
+   - 支撑材料：BDATA26XXXXXXmodel.zip
+   - AI说明（打进 zip 内）：DATA26XXXXXX AI使用说明.pdf

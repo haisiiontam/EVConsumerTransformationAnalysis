@@ -1,8 +1,7 @@
-"""任务三 SHAP 独立脚本：用已保存 CatBoost 模型 + 冻结 develop 集。
-
-优先 CatBoost 原生 ShapValues（避免 shap.TreeExplainer 原生崩溃）。
-建议使用 .venv-shap（Python 3.12）运行。
-"""
+\
+\
+\
+\
 
 from __future__ import annotations
 
@@ -59,7 +58,7 @@ def main() -> int:
         cat_feature_indices=cat_indices(state),
         max_samples=args.max_samples,
     )
-    # 同步进 paper 说明
+
     paper = output_dir / "paper"
     paper.mkdir(parents=True, exist_ok=True)
     figs = info.get("figures") or []

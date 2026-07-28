@@ -1,5 +1,3 @@
-"""互补性、软投票、Stacking、类别偏置后处理。"""
-
 from __future__ import annotations
 
 import itertools
@@ -35,7 +33,7 @@ def complementarity(
     b_wrong_a_right = int((wrong_b & ~wrong_a).sum())
     disagree = pred_a != pred_b
     disagree_acc = float((pred_a[disagree] == y_n[disagree]).mean()) if disagree.any() else float("nan")
-    # 平均三类概率相关
+
     corrs = []
     for k in range(3):
         if pa[:, k].std() > 1e-12 and pb[:, k].std() > 1e-12:
@@ -85,7 +83,7 @@ def soft_vote_search(
     """在最多 max_models 个模型上网格搜索权重。"""
     y_n = normalize_label_array(y)
     y_idx = np.array([{"Low": 0, "Medium": 1, "High": 2}[lab] for lab in y_n], dtype=int)
-    # 先按单模 Acc 排序取前 max_models
+
     ranked = sorted(
         models.items(),
         key=lambda kv: float((pred_from_proba(kv[1]) == y_n).mean()),
@@ -123,7 +121,7 @@ def soft_vote_search(
     assert best is not None
     best_p = best.pop("_p")
     best.pop("_n_active", None)
-    # 对最优权重补全完整指标
+
     met = evaluate_multiclass(y_n, pred_from_proba(best_p), best_p)
     best.update(met)
     return best, best_p, pd.DataFrame(rows)
@@ -149,7 +147,7 @@ def _better(m: Dict[str, Any], best: Dict[str, Any], n_active: int, best_active:
 def _meta_features(prob_list: Sequence[np.ndarray]) -> np.ndarray:
     parts = list(prob_list)
     stack = np.concatenate(parts, axis=1)
-    # 平均概率上的 max / margin / entropy
+
     avg = np.mean(prob_list, axis=0)
     sorted_p = np.sort(avg, axis=1)
     max_p = sorted_p[:, -1:]

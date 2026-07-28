@@ -1,5 +1,3 @@
-"""预处理：数值/类别识别、训练集中位数填补、CatBoost 类别索引。"""
-
 from __future__ import annotations
 
 import logging

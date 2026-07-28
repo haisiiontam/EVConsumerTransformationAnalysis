@@ -1,5 +1,3 @@
-"""生成任务一论文用 Markdown 材料。"""
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -130,7 +128,7 @@ Do not claim causal effects from SHAP rankings.
         encoding="utf-8",
     )
 
-    # also mirror to docs/
+
     docs = Path("docs")
     docs.mkdir(exist_ok=True)
     for p in paper.glob("task1_*.md"):

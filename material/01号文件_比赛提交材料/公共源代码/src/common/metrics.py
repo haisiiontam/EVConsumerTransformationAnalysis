@@ -1,5 +1,3 @@
-"""评价指标与 JSON 保存。"""
-
 from __future__ import annotations
 
 import json
@@ -83,7 +81,7 @@ def binary_classification_metrics(
 
     if y_prob_1 is not None:
         prob = np.asarray(y_prob_1, dtype=float)
-        # 裁剪避免 log_loss 数值问题
+
         prob = np.clip(prob, 1e-15, 1.0 - 1e-15)
         try:
             metrics["roc_auc"] = float(roc_auc_score(y_true_arr, prob))

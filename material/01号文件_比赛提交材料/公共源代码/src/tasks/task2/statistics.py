@@ -1,5 +1,3 @@
-"""任务二统计证伪：置换检验、Bootstrap、McNemar。"""
-
 from __future__ import annotations
 
 import logging
@@ -36,7 +34,7 @@ def _fast_oof_auc_acc(
         X_tr = transform_tabular(X_dev.loc[tr], state)
         X_va = transform_tabular(X_dev.loc[va], state)
         lr = LogisticRegression(max_iter=400, C=1.0, random_state=42)
-        # 若置换后单类，退回常数
+
         if len(np.unique(y[tr])) < 2:
             p1[va] = float(y[tr].mean()) if len(y[tr]) else 0.5
             continue
@@ -87,7 +85,7 @@ def run_permutation_test(
 
     df = pd.DataFrame(rows)
     atomic_write_csv(out / "permutation_results.csv", df)
-    # 单侧：观测 AUC 是否显著大于置换分布
+
     p_auc = float((df["oof_auc"] >= obs_auc).mean())
     p_lift = float((df["lift_vs_majority"] >= obs_lift).mean())
     summary = {
@@ -176,14 +174,14 @@ def run_mcnemar(
     y = np.asarray(y_true).astype(int)
     a = np.asarray(pred_model).astype(int)
     b = np.asarray(pred_majority).astype(int)
-    # b01: model wrong, majority right; b10: model right, majority wrong
+
     model_wrong = a != y
     maj_wrong = b != y
     n01 = int((model_wrong & ~maj_wrong).sum())
     n10 = int((~model_wrong & maj_wrong).sum())
-    # continuity-corrected chi-square
+
     stat = (abs(n01 - n10) - 1) ** 2 / max(n01 + n10, 1)
-    # rough p via chi2 df=1 survival; avoid scipy dependency if missing
+
     try:
         from scipy.stats import chi2
 

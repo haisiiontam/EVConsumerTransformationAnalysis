@@ -1,5 +1,3 @@
-"""任务二最终方案锁定：弱信号下回退多数类 M。"""
-
 from __future__ import annotations
 
 import logging

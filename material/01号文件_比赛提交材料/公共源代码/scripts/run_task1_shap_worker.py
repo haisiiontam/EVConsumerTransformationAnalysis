@@ -1,7 +1,6 @@
-"""独立 SHAP 子进程：崩溃不影响主训练进程。
-
-优先使用已保存 .cbm；若不存在则按 params 在 develop 上重训 M1（仅用于解释）。
-"""
+\
+\
+\
 
 from __future__ import annotations
 

@@ -1,5 +1,3 @@
-"""任务二弱信号诊断全流程（StageGate + 断点续跑）。"""
-
 from __future__ import annotations
 
 import json
@@ -81,7 +79,7 @@ def _task2_skip(stage: str, opts: RunOptions) -> bool:
         return True
     if opts.audit_only and stage != "audit":
         return True
-    # 默认关闭的重模块
+
     if stage == "m6_tabnet" and not TASK2_ENABLE_TABNET:
         return True
     if stage == "cross_task_aux" and not TASK2_ENABLE_CROSS_TASK_AUX:
@@ -109,7 +107,7 @@ def _task2_skip(stage: str, opts: RunOptions) -> bool:
     if opts.mode == "quick" and stage in quick_skip:
         logger.info("skip %s (quick mode)", stage)
         return True
-    # full 论文路线：仍跳过堆叠/校准深挖/提交（可后续补）
+
     if opts.mode == "full" and stage in {"stacking", "calibration", "explain", "submission"}:
         logger.info("skip %s (full paper-core path)", stage)
         return True
@@ -273,7 +271,7 @@ def _run_final_validation(
         p_val = lr.predict_proba(X_va)[:, 1]
         pred = (p_val >= threshold).astype(int)
     elif locked_scheme.startswith("eb") or locked_scheme.startswith("B0"):
-        # EB / majority：用 develop 全局率或多数类
+
         if locked_scheme.startswith("B0") or locked_scheme == "M":
             p_val = np.full(len(y_val_arr), float(majority_class), dtype=float)
             pred = np.full(len(y_val_arr), majority_class, dtype=int)
@@ -282,7 +280,7 @@ def _run_final_validation(
             p_val = np.full(len(y_val_arr), rate, dtype=float)
             pred = (p_val >= threshold).astype(int)
     else:
-        # 默认多数类
+
         p_val = np.full(len(y_val_arr), float(majority_class), dtype=float)
         pred = np.full(len(y_val_arr), majority_class, dtype=int)
 
@@ -326,7 +324,7 @@ def run(
     **kwargs: Any,
 ) -> Dict[str, Any]:
     """任务二弱信号诊断完整流水线。"""
-    del kwargs, skip_optuna, alpha_step, threshold_min, threshold_max, threshold_step  # 保留 API 兼容
+    del kwargs, skip_optuna, alpha_step, threshold_min, threshold_max, threshold_step
     output_dir = Path(output_dir)
     _ensure_dirs(output_dir)
     run_id = run_id or f"task2_{mode}_{int(time.time())}"
@@ -375,12 +373,12 @@ def run(
     feat_b = sets["B_safe_raw"]
     feat_mech = sets.get("B+all_mechanism", feat_b)
 
-    # ---- audit stage ----
+
     if gate.should_execute("audit"):
         gate.begin("audit")
         gate.complete("audit")
 
-    # ---- split ----
+
     if gate.should_execute("split"):
         gate.begin("split")
     df_dev, df_val, y_dev, y_val, fold_assign = _freeze_or_load_splits(
@@ -403,7 +401,7 @@ def run(
     oof_acc = majority_acc
     final_acc = float("nan")
 
-    # ---- baseline ----
+
     if gate.should_execute("baseline"):
         gate.begin("baseline")
         base = run_baselines(df_dev, y_dev, fold_assign, output_dir, n_folds=n_folds)
@@ -420,26 +418,26 @@ def run(
             if p.exists():
                 candidate_oofs[key] = pd.read_csv(p)
 
-    # ---- label_audit ----
+
     if gate.should_execute("label_audit"):
         gate.begin("label_audit")
         label_summary = run_label_audit(df_dev, y_dev, output_dir)
         gate.complete("label_audit")
 
-    # ---- separability ----
+
     if gate.should_execute("separability"):
         gate.begin("separability")
         sep_out = run_separability_stage(df_dev, y_dev, output_dir, feat_mech)
         sep_summary = sep_out.get("summary", {})
         gate.complete("separability")
 
-    # ---- missingness ----
+
     if gate.should_execute("missingness"):
         gate.begin("missingness")
         run_missingness_analysis(df_dev, y_dev, output_dir, feat_b)
         gate.complete("missingness")
 
-    # ---- segment_analysis (light) ----
+
     if gate.should_execute("segment_analysis"):
         gate.begin("segment_analysis")
         rows = []
@@ -452,13 +450,13 @@ def run(
         atomic_write_csv(output_dir / "diagnostics" / "segment_rates.csv", pd.DataFrame(rows))
         gate.complete("segment_analysis")
 
-    # ---- feature_ablation ----
+
     if gate.should_execute("feature_ablation"):
         gate.begin("feature_ablation")
         run_feature_ablation(df_dev, y_dev, fold_assign, output_dir, majority_acc, n_folds=n_folds)
         gate.complete("feature_ablation")
 
-    # ---- empirical_bayes ----
+
     if gate.should_execute("empirical_bayes"):
         gate.begin("empirical_bayes")
         eb_result = run_empirical_bayes(df_dev, y_dev, fold_assign, output_dir, n_folds=n_folds)
@@ -469,7 +467,7 @@ def run(
         if p.exists():
             candidate_oofs["eb_best"] = pd.read_csv(p)
 
-    # ---- clustering_prior ----
+
     if gate.should_execute("clustering_prior"):
         gate.begin("clustering_prior")
         clus = run_clustering_prior(df_dev, y_dev, fold_assign, feat_b, output_dir, n_folds=n_folds)
@@ -480,7 +478,7 @@ def run(
         if p.exists():
             candidate_oofs["cluster_prior"] = pd.read_csv(p)
 
-    # ---- m1_logistic_gam ----
+
     if gate.should_execute("m1_logistic_gam"):
         gate.begin("m1_logistic_gam")
         quick = run_quick_models(
@@ -497,7 +495,7 @@ def run(
             if oof_p.exists():
                 candidate_oofs[name] = pd.read_csv(oof_p)
 
-    # ---- m2_catboost ---- (included in quick models; mark complete)
+
     if gate.should_execute("m2_catboost"):
         gate.begin("m2_catboost")
         if "catboost_b" not in candidate_oofs:
@@ -508,7 +506,7 @@ def run(
                 candidate_oofs[k] = oof
         gate.complete("m2_catboost")
 
-    # ---- m3/m4/m5 heterogeneous ----
+
     for stage_name, model_key in [
         ("m3_lightgbm", "lightgbm"),
         ("m4_xgboost", "xgboost"),
@@ -533,7 +531,7 @@ def run(
             if p.exists():
                 candidate_oofs[model_key] = pd.read_csv(p)
 
-    # ---- cross_task_aux (full) ----
+
     if gate.should_execute("cross_task_aux"):
         gate.begin("cross_task_aux")
         try:
@@ -546,13 +544,13 @@ def run(
         except Exception as e:
             gate.partial("cross_task_aux", error=str(e))
 
-    # ---- diversity ----
+
     if gate.should_execute("diversity"):
         gate.begin("diversity")
         diversity_report(candidate_oofs, output_dir)
         gate.complete("diversity")
 
-    # ---- soft_blend ----
+
     if gate.should_execute("soft_blend"):
         gate.begin("soft_blend")
         blend = soft_blend_search(candidate_oofs, y_dev, output_dir)
@@ -564,11 +562,11 @@ def run(
         if p.exists():
             candidate_oofs["soft_blend"] = pd.read_csv(p)
 
-    # ---- threshold ----
+
     if gate.should_execute("threshold"):
         gate.begin("threshold")
         comp_pre = compare_candidates(majority_class, majority_acc, y_dev, candidate_oofs)
-        # 对最佳非 M 候选做阈值搜索
+
         non_m = comp_pre[comp_pre["candidate"] != "M_majority"]
         if len(non_m):
             best_cand = str(non_m.iloc[0]["candidate"])
@@ -588,7 +586,7 @@ def run(
         )
         gate.complete("threshold", threshold=best_thr)
 
-    # ---- permutation_test ----
+
     if gate.should_execute("permutation_test"):
         gate.begin("permutation_test")
         perm_summary = run_permutation_test(
@@ -602,7 +600,7 @@ def run(
         )
         gate.complete("permutation_test", supports_signal=perm_summary.get("supports_signal"))
 
-    # ---- multiseed (light: majority Acc across seeds) ----
+
     if gate.should_execute("multiseed"):
         gate.begin("multiseed")
         stab = output_dir / "stability"
@@ -628,10 +626,10 @@ def run(
         atomic_write_csv(stab / "multiseed_majority.csv", pd.DataFrame(seed_rows))
         gate.complete("multiseed")
 
-    # ---- bootstrap ----
+
     if gate.should_execute("bootstrap"):
         gate.begin("bootstrap")
-        # 用当前最佳非多数候选；若无则用 logistic_none / catboost_b
+
         ref = None
         for key in ("soft_blend", "catboost_b", "logistic_none", "eb_best", "lightgbm"):
             if key in candidate_oofs:
@@ -650,7 +648,7 @@ def run(
             )
         gate.complete("bootstrap")
 
-    # ---- final_lock ----
+
     if gate.should_execute("final_lock"):
         gate.begin("final_lock")
         comp = compare_candidates(majority_class, majority_acc, y_dev, candidate_oofs)
@@ -679,7 +677,7 @@ def run(
             locked_scheme = lock_cfg.get("locked_scheme", "M")
             oof_acc = float(lock_cfg.get("oof_accuracy", majority_acc))
 
-    # ---- final_validation ----
+
     if gate.should_execute("final_validation"):
         gate.begin("final_validation")
         fv = _run_final_validation(
@@ -697,7 +695,7 @@ def run(
         final_acc = float(fv["accuracy"])
         gate.complete("final_validation", accuracy=final_acc)
 
-    # ---- report ----
+
     if gate.should_execute("report"):
         gate.begin("report")
         write_paper_reports(

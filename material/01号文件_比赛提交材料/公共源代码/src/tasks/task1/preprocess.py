@@ -1,5 +1,3 @@
-"""任务一折内预处理：CatBoost 原生类别 / 表模型 One-Hot。"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -81,7 +79,7 @@ def transform_cat(X: pd.DataFrame, state: CatPrepState) -> pd.DataFrame:
             if state.fill_numeric_median:
                 out[col] = s.fillna(state.numeric_medians.get(col, 0.0))
             else:
-                # 保留缺失给 CatBoost 原生处理（用极小哨兵标记可选；此处用 NaN）
+
                 out[col] = s
         else:
             miss = Xw[col].isna()

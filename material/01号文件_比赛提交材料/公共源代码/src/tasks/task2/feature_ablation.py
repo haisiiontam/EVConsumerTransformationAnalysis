@@ -1,5 +1,3 @@
-"""任务二特征消融（快速对照，防过完备宣称）。"""
-
 from __future__ import annotations
 
 import logging

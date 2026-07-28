@@ -1,5 +1,3 @@
-"""分类—回归融合、软投票、多样性分析。"""
-
 from __future__ import annotations
 
 import logging
@@ -35,7 +33,7 @@ def diversity_report(
     output_dir.mkdir(parents=True, exist_ok=True)
     y, ps = _align_p1(model_oofs)
     names = list(ps.keys())
-    # correlation
+
     corr = pd.DataFrame({n: ps[n] for n in names}).corr(method="pearson")
     atomic_write_csv(output_dir / "probability_correlation.csv", corr.reset_index())
 
@@ -108,7 +106,7 @@ def classifier_regressor_fusion(
                         continue
                     p = alpha * p_cls + beta * p_reg + gamma * p_ord
                     g = float(gamma)
-                # threshold search coarse
+
                 for thr in (0.45, 0.5, 0.55):
                     pred = (p >= thr).astype(int)
                     acc = float((pred == y).mean())
@@ -127,7 +125,7 @@ def classifier_regressor_fusion(
                             best = row
                             best_p = p.copy()
 
-    # boundary-aware
+
     for w in np.round(np.arange(0.0, 1.0 + 1e-12, 0.1), 10):
         unc = 1.0 - 2.0 * np.abs(p_cls - 0.5)
         p = (1 - w * unc) * p_cls + (w * unc) * p_reg
@@ -156,12 +154,12 @@ def soft_blend_search(
     max_models: int = 5,
 ) -> Tuple[pd.DataFrame, Dict[str, Any], np.ndarray]:
     names = list(model_p1.keys())[:max_models]
-    # 简单：两两/三三网格对 top models
+
     rows = []
     best = {"accuracy": -1.0, "weights": {}}
     best_p = model_p1[names[0]].copy()
 
-    # equal weight baseline
+
     stack = np.column_stack([model_p1[n] for n in names])
     p_eq = stack.mean(axis=1)
     acc_eq = float(((p_eq >= 0.5).astype(int) == y).mean())
@@ -170,7 +168,7 @@ def soft_blend_search(
         best = {"accuracy": acc_eq, "weights": {n: 1.0 / len(names) for n in names}, "threshold": 0.5}
         best_p = p_eq
 
-    # pairwise for first 3
+
     for i, a in enumerate(names[:3]):
         for b in names[i + 1 : 4]:
             for wa in np.round(np.arange(0.0, 1.0 + 1e-12, step), 10):

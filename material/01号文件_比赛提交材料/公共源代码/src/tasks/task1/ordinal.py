@@ -1,5 +1,3 @@
-"""M2：序数 CatBoost 双边界累积模型。"""
-
 from __future__ import annotations
 
 import json

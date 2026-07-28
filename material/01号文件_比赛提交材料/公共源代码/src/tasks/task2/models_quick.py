@@ -1,5 +1,3 @@
-"""任务二快速模型：Logistic + CatBoost OOF。"""
-
 from __future__ import annotations
 
 import logging
@@ -241,7 +239,7 @@ def run_quick_models(
     comp = pd.DataFrame(metric_rows)
     atomic_write_csv(oof_dir / "quick_models_comparison.csv", comp)
     atomic_write_json(oof_dir / "quick_models_metrics.json", {"models": metric_rows})
-    # 兼容 audit 路径
+
     if "logistic_none" in results:
         atomic_write_csv(oof_dir / "logistic_oof_predictions.csv", results["logistic_none"])
     if "catboost_b" in results:

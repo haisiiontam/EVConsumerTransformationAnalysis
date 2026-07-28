@@ -1,5 +1,3 @@
-"""运行状态审计：区分 full / stale quick，检查文件完整性。"""
-
 from __future__ import annotations
 
 import json
@@ -125,7 +123,7 @@ def run_audit(
                 }
             )
 
-    # ---- split ----
+
     for rel in [
         "splits/develop_indices.csv",
         "splits/final_validation_indices.csv",
@@ -144,7 +142,7 @@ def run_audit(
             checks = {"readable": ok, "detail": msg}
         add_art("split", rel, True, checks)
 
-    # ---- baseline ----
+
     ok, msg, base_oof = _readable_csv(output_dir / "baseline" / "baseline_oof_predictions.csv")
     oof_checks = _check_oof(base_oof, dev_idx) if ok and base_oof is not None else {"readable": False}
     oof_checks["readable"] = ok
@@ -163,7 +161,7 @@ def run_audit(
             ok, msg, _ = _readable_csv(output_dir / rel)
         add_art("baseline", rel, True, {"readable": ok, "detail": msg})
 
-    # ---- ablation / feature selection ----
+
     ok, msg, abl = _readable_csv(output_dir / "ablation" / "feature_ablation.csv")
     add_art(
         "ablation",
@@ -187,7 +185,7 @@ def run_audit(
         },
     )
 
-    # ---- catboost optuna ----
+
     ok, msg, cb = _readable_csv(output_dir / "tuning" / "optuna_catboost_trials.csv")
     cb_checks: Dict[str, Any] = {"readable": ok, "detail": msg, "configured_trials": TASK1_OPTUNA_TRIALS_CB}
     if ok and cb is not None and "trial" in cb.columns:
@@ -214,7 +212,7 @@ def run_audit(
     ok, msg, m1p = _readable_json(output_dir / "tuning" / "m1_best_params.json")
     add_art("m1_catboost", "tuning/m1_best_params.json", True, {"readable": ok, "detail": msg})
 
-    # M1/M2/M3 OOF expected paths (current code never wrote these for full)
+
     for stage, rel in [
         ("m1_catboost", "oof/m1_oof_predictions.csv"),
         ("m1_catboost", "checkpoints/m1/oof_predictions.csv"),
@@ -234,7 +232,7 @@ def run_audit(
     ok, msg, m3t = _readable_json(output_dir / "tuning" / "m3_threshold_temp.json")
     add_art("m3_regression", "tuning/m3_threshold_temp.json", True, {"readable": ok, "detail": msg})
 
-    # LGBM
+
     ok, msg, lgb = _readable_csv(output_dir / "tuning" / "optuna_lgbm_trials.csv")
     lgb_checks: Dict[str, Any] = {
         "readable": ok,
@@ -261,7 +259,7 @@ def run_audit(
             checks.update(_check_oof(df, dev_idx))
         add_art("lightgbm_model", rel, True, checks)
 
-    # stale-prone stages
+
     for stage, rels in {
         "xgboost": ["oof/xgb_oof_predictions.csv", "checkpoints/xgb/oof_predictions.csv"],
         "logistic": ["oof/m6_coefficients.csv", "oof/m6_oof_predictions.csv"],
@@ -294,7 +292,7 @@ def run_audit(
                 checks.update(_check_oof(obj, dev_idx))
             add_art(stage, rel, True, checks)
 
-    # also mark very old oof_predictions from Jul 25
+
     add_art(
         "stale_misc",
         "oof/oof_predictions.csv",
@@ -310,29 +308,29 @@ def run_audit(
         sub = art_df[art_df["stage"] == stage]
         if sub.empty:
             return "pending"
-        # required artifacts for this stage
-        req = sub[sub["required"] == True]  # noqa: E712
+
+        req = sub[sub["required"] == True]
         if req.empty:
             req = sub
-        # if all missing -> pending
+
         if not req["exists"].any():
             return "pending"
-        # if any exists but from stale only and none from full -> stale
+
         sources = set(req.loc[req["exists"], "source"].tolist())
         if sources and sources <= {"stale_from_previous_run"}:
             return "stale"
-        # full artifacts present?
+
         full_ok = req[req["source"] == "from_this_full"]
         if full_ok.empty:
             return "stale" if req["exists"].any() else "pending"
 
-        # content checks
+
         def row_ok(r: pd.Series) -> bool:
             if not r["exists"] or r["source"] != "from_this_full":
                 return False
             if r.get("check_readable") is False:
                 return False
-            # OOF-specific
+
             if "check_row_count_ok" in r and pd.notna(r.get("check_row_count_ok")):
                 if r.get("check_row_count_ok") is not True:
                     return False
@@ -342,7 +340,7 @@ def run_audit(
                 return int(r.get("check_n_rows") or 0) >= 5
             return bool(r.get("check_readable", True))
 
-        # special logic per stage
+
         if stage == "catboost_optuna":
             r = full_ok.iloc[0]
             return "completed" if r.get("check_complete_vs_config") is True else "partial"
@@ -350,7 +348,7 @@ def run_audit(
             r = full_ok[full_ok["artifact"].str.contains("optuna_lgbm")].iloc[0]
             return "completed" if r.get("check_complete_vs_config") is True else "partial"
         if stage in {"m1_catboost", "m2_ordinal", "m3_regression", "lightgbm_model"}:
-            # params/threshold may be complete while OOF missing
+
             has_params = False
             has_oof = False
             for _, r in req.iterrows():
@@ -360,7 +358,7 @@ def run_audit(
                     if r.get("check_row_count_ok") is True and r.get("check_index_match") is True:
                         has_oof = True
                     elif r["exists"] and r.get("check_readable") is True:
-                        # exists but incomplete
+
                         has_oof = has_oof or False
                 if "params" in r["artifact"] or "threshold_temp" in r["artifact"]:
                     if r.get("check_readable") is True:
@@ -368,14 +366,14 @@ def run_audit(
             if has_oof and (has_params or stage == "m2_ordinal"):
                 return "completed"
             if has_params or (stage == "m2_ordinal" and has_params):
-                # m2 has no params file; infer from m3 threshold existing after m2 in pipeline
+
                 return "partial"
             if stage == "m2_ordinal":
-                # M2 left no artifacts; infer partial if m3 threshold from this full exists
+
                 m3 = art_df[
                     (art_df["artifact"] == "tuning/m3_threshold_temp.json")
                     & (art_df["source"] == "from_this_full")
-                    & (art_df["exists"] == True)  # noqa: E712
+                    & (art_df["exists"] == True)
                 ]
                 return "partial" if len(m3) else "pending"
             if stage == "m1_catboost":
@@ -383,17 +381,17 @@ def run_audit(
             if stage == "m3_regression":
                 return "partial" if has_params else "pending"
             if stage == "lightgbm_model":
-                # optuna done but no OOF
+
                 lgb_o = art_df[
                     (art_df["stage"] == "lightgbm_optuna")
                     & (art_df["source"] == "from_this_full")
-                    & (art_df["exists"] == True)  # noqa: E712
+                    & (art_df["exists"] == True)
                 ]
                 return "partial" if len(lgb_o) else "pending"
             return "partial"
 
-        # default: all required full artifacts readable
-        needed = req[req["required"] == True]  # noqa: E712
+
+        needed = req[req["required"] == True]
         oks = []
         for _, r in needed.iterrows():
             oks.append(row_ok(r))
@@ -403,7 +401,7 @@ def run_audit(
             return "partial"
         return "pending"
 
-    # Override inferences from pipeline knowledge
+
     stages_status: Dict[str, Any] = {}
     for st in STAGES:
         status = stage_status(st)
@@ -412,7 +410,7 @@ def run_audit(
             "note": "",
         }
 
-    # Explicit overrides from known pipeline semantics
+
     stages_status["split"]["status"] = "completed"
     stages_status["split"]["note"] = "frozen indices written at full start"
     stages_status["baseline"]["status"] = "completed"
@@ -459,7 +457,7 @@ def run_audit(
             "status": "stale" if st in {"logistic", "diversity", "soft_blend", "stacking", "class_bias", "multiseed", "final_validation", "shap", "report"} and (output_dir / "ensemble").exists() else "pending",
             "note": "artifacts mtime before full start (quick run) — must redo for this full",
         }
-    # refine stale vs pending for post-lgbm stages: files exist but stale
+
     for st in [
         "logistic",
         "diversity",
@@ -475,12 +473,12 @@ def run_audit(
 
     stages_status["xgboost"] = {"status": "pending", "note": "no full-run XGB OOF"}
 
-    # first resume stage
+
     resume_order = STAGES
     first = None
     for st in resume_order:
         if stages_status[st]["status"] in {"pending", "partial", "stale", "failed"}:
-            # skip optuna completed
+
             if st in {"catboost_optuna", "catboost_confirmation", "lightgbm_optuna"} and stages_status[st]["status"] == "completed":
                 continue
             if stages_status[st]["status"] == "completed":

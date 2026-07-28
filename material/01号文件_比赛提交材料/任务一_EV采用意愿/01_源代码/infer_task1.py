@@ -1,4 +1,3 @@
-"""任务一推理：soft_vote = 0.55*M6 + 0.35*M1 + 0.10*M3"""
 from __future__ import annotations
 
 import argparse
@@ -14,8 +13,8 @@ from catboost import CatBoostClassifier, CatBoostRegressor
 def _add_src_path() -> None:
     here = Path(__file__).resolve()
     candidates = [
-        here.parents[1] / "公共源代码",  # 任务目录旁
-        here.parents[2] / "公共源代码",  # 比赛提交材料根
+        here.parents[1] / "公共源代码",
+        here.parents[2] / "公共源代码",
         here.parents[2],
         here.parents[3],
         Path.cwd(),
@@ -54,7 +53,7 @@ def main() -> int:
 
     m1 = CatBoostClassifier()
     m1.load_model(str(md / "task1_m1_catboost.cbm"))
-    # CatBoost classes order
+
     classes = list(m1.classes_)
     p1_raw = m1.predict_proba(X)
     order = ["Low", "Medium", "High"]

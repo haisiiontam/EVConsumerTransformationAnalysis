@@ -1,5 +1,3 @@
-"""Stage 调度：任务一专用 STAGES / skip 策略。"""
-
 from __future__ import annotations
 
 import logging
@@ -8,7 +6,7 @@ from typing import Dict, Optional, Set
 
 from src.common.io_utils import RunState
 from src.common.stage_control import StageGate as _StageGate
-from src.common.stage_control import completed_from_audit  # noqa: F401
+from src.common.stage_control import completed_from_audit
 from src.tasks.task1.io_utils import STAGES
 
 logger = logging.getLogger(__name__)
@@ -60,7 +58,7 @@ _RESUME_SKIP = {
 
 class StageGate:
     def __init__(self, opts: RunOptions, state: RunState):
-        # 适配 common StageGate（opts 字段兼容）
+
         from src.common.stage_control import RunOptions as CommonOpts
 
         common_opts = CommonOpts(

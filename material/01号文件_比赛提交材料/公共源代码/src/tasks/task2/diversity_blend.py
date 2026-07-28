@@ -1,5 +1,3 @@
-"""任务二多样性与软融合（弱信号下可能全部退化）。"""
-
 from __future__ import annotations
 
 import logging
@@ -26,7 +24,7 @@ def diversity_report(
     rows: List[Dict[str, Any]] = []
     for a, b in combinations(names, 2):
         oa, ob = candidates[a], candidates[b]
-        # align on sample_index
+
         m = oa.merge(ob, on="sample_index", suffixes=("_a", "_b"))
         if m.empty:
             continue
@@ -78,7 +76,7 @@ def soft_blend_search(
     """最多 4 个候选的网格软融合；若无提升则返回 empty。"""
     out = Path(output_dir) / "ensemble"
     out.mkdir(parents=True, exist_ok=True)
-    # 选 Acc/AUC 较好且非多数类标签的候选
+
     scored = []
     for name, oof in candidates.items():
         if name.startswith("B0") or name.startswith("M"):
@@ -92,7 +90,7 @@ def soft_blend_search(
         atomic_write_json(out / "soft_blend_best.json", cfg)
         return cfg
 
-    # align
+
     base = picked[0][3][["sample_index", "true_label"]].copy()
     probs = []
     names = []
@@ -100,12 +98,12 @@ def soft_blend_search(
         names.append(name)
         tmp = base.merge(oof[["sample_index", "prob_1"]], on="sample_index", how="left")
         probs.append(tmp["prob_1"].to_numpy(dtype=float))
-    P = np.vstack(probs)  # (m, n)
+    P = np.vstack(probs)
     y = base["true_label"].to_numpy().astype(int)
 
     best = {"accuracy": -1.0}
     rows = []
-    # 粗网格权重
+
     m = len(names)
     if m == 2:
         grid = [(w, 1 - w) for w in np.round(np.arange(0.0, 1.01, 0.1), 10)]
@@ -118,7 +116,7 @@ def soft_blend_search(
                     continue
                 grid.append((a, b, max(c, 0.0)))
     else:
-        # 均匀 + 单模型端点
+
         grid = [tuple([1.0 / m] * m)]
         for i in range(m):
             w = [0.0] * m
@@ -145,7 +143,7 @@ def soft_blend_search(
 
     atomic_write_csv(out / "soft_blend_search.csv", pd.DataFrame(rows))
     atomic_write_json(out / "soft_blend_best.json", best)
-    # 保存最优融合 OOF
+
     if best.get("available"):
         w = np.array([best["weights"][n] for n in names], dtype=float)
         p = (w.reshape(-1, 1) * P).sum(axis=0)

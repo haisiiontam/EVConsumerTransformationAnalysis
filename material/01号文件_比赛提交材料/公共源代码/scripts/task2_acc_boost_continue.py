@@ -1,7 +1,6 @@
-"""任务二 ACC 冲高实验：跨任务 OOF / 焦虑消融 / 细阈值 / 缺失指示 / stacking / 多 seed 门控。
-
-不自动改正式 lock；仅当稳定 lift 满足门控时写出 relock 建议并可选更新 final。
-"""
+\
+\
+\
 
 from __future__ import annotations
 
@@ -224,11 +223,11 @@ def _multiseed_eval(
             p1 = _oof_logistic(df_dev, y_dev, features, fold_assign, n_folds)
         else:
             p1 = _oof_catboost(df_dev, y_dev, features, fold_assign, n_folds, iterations=300)
-        # per-seed majority from full develop prior for reporting
+
         maj = majority_baseline(y_arr)
         maj_acc = float(maj["majority_baseline_accuracy"])
         thr, best = _fine_threshold(y_arr, p1, maj_acc)
-        # fold-wise majority
+
         fold_accs = []
         fold_lifts = []
         for f in range(n_folds):
@@ -309,15 +308,15 @@ def main() -> int:
         },
     )
 
-    # ---- cross-task OOF ----
+
     aux_path = boost_dir / "cross_task_oof_features.csv"
     if aux_path.exists():
         logger.info("loading cached cross-task OOF aux features...")
         aux = pd.read_csv(aux_path)
         if "sample_index" in aux.columns:
             aux = aux.set_index("sample_index")
-            aux.index = df_dev.index  # align to develop order if same length
-            # prefer reindex by sample_index values
+            aux.index = df_dev.index
+
             aux = pd.read_csv(aux_path)
             aux = aux.set_index("sample_index").reindex(df_dev.index.astype(int))
             aux.index = df_dev.index
@@ -327,11 +326,11 @@ def main() -> int:
     df_aux = attach_aux_to_frame(df_dev, aux)
     feat_aux = feat_b + [c for c in AUX_FEATURE_NAMES if c in df_aux.columns]
 
-    # missingness
+
     df_miss, miss_cols = _make_missing_indicators(df_dev, feat_b)
     feat_miss = feat_b + miss_cols
 
-    # anxiety ablation features
+
     feat_anx = list(feat_b)
     if TASK2_ALLOW_ANXIETY_ABLATION and TASK3_SOURCE_SCORE in df_dev.columns:
         feat_anx = feat_b + [TASK3_SOURCE_SCORE]
@@ -358,7 +357,7 @@ def main() -> int:
     oof_store: Dict[str, np.ndarray] = {}
     thr_store: Dict[str, float] = {}
 
-    # majority baseline row
+
     comparison_rows.append(
         {
             "candidate": "M_majority",
@@ -379,11 +378,11 @@ def main() -> int:
         else:
             p1 = _oof_catboost(dframe, y_dev, feats, fold_assign, n_folds)
         oof_store[name] = p1
-        # default 0.5
+
         row05 = _metrics_row(name + "@0.5", y_arr, p1, majority_acc, 0.5)
         row05["folds_beat_majority"] = _fold_beats_majority(y_arr, p1, fold_assign, 0.5)
         comparison_rows.append(row05)
-        # fine threshold
+
         thr, best = _fine_threshold(y_arr, p1, majority_acc)
         thr_store[name] = thr
         best["candidate"] = name + f"@thr{thr:.3f}"
@@ -402,11 +401,11 @@ def main() -> int:
             ),
         )
 
-    # anxiety ablation summary table
+
     abl_rows = [r for r in comparison_rows if "anxiety" in r["candidate"] or r["candidate"].startswith("B_safe_logistic") or r["candidate"].startswith("B_safe_aux")]
     atomic_write_csv(boost_dir / "anxiety_ablation.csv", pd.DataFrame(abl_rows))
 
-    # stacking from strongest base probs at thr=0.5 versions
+
     base_for_stack = {}
     for key in ("B_safe_logistic", "B_safe_catboost", "B_safe_aux_logistic", "B_safe_aux_catboost"):
         if key in oof_store:
@@ -429,7 +428,7 @@ def main() -> int:
     )
     atomic_write_csv(boost_dir / "acc_boost_comparison.csv", comp)
 
-    # pick best non-majority by lift then acc
+
     non_m = comp[~comp["candidate"].astype(str).str.startswith("M_")].copy()
     best_row = non_m.iloc[0].to_dict() if len(non_m) else None
     gate = {
@@ -447,10 +446,10 @@ def main() -> int:
 
     if best_row is not None and float(best_row["lift_vs_majority"]) >= TASK2_ACC_BOOST_MIN_LIFT:
         gate["passed_oof_lift"] = True
-        # recover base name and features for multiseed
+
         cand = str(best_row["candidate"])
         base_name = cand.split("@")[0]
-        # map to feature set
+
         feat_map = {
             "B_safe_logistic": (df_dev, feat_b, "logistic"),
             "B_safe_catboost": (df_dev, feat_b, "catboost"),
@@ -461,7 +460,7 @@ def main() -> int:
             "B_safe_anxiety_catboost": (df_dev, feat_anx, "catboost"),
             "B_safe_anxiety_aux_logistic": (df_aux, feat_anx_aux, "logistic"),
             "B_safe_anxiety_aux_catboost": (df_aux, feat_anx_aux, "catboost"),
-            "stack_meta": (df_aux, feat_aux, "logistic"),  # proxy
+            "stack_meta": (df_aux, feat_aux, "logistic"),
         }
         if base_name in feat_map and base_name != "stack_meta":
             dframe, feats, builder = feat_map[base_name]
@@ -474,7 +473,7 @@ def main() -> int:
             gate["multiseed_seeds_nonneg"] = seeds_ok
             gate["passed_multiseed"] = bool(mean_lift > 0 and seeds_ok >= 2)
 
-            # bootstrap on seed42 OOF of best
+
             p1 = oof_store.get(base_name)
             thr = thr_store.get(base_name, 0.5)
             if p1 is not None:
@@ -483,7 +482,7 @@ def main() -> int:
                 atomic_write_json(boost_dir / "bootstrap_gate.json", boot)
                 gate["bootstrap"] = boot
                 ci_lo = boot["delta_acc_ci95"][0]
-                gate["passed_bootstrap"] = bool(ci_lo > -0.002)  # not clearly negative
+                gate["passed_bootstrap"] = bool(ci_lo > -0.002)
         else:
             gate["multiseed_note"] = f"skip multiseed for {base_name}"
 
@@ -492,7 +491,7 @@ def main() -> int:
     )
     atomic_write_json(boost_dir / "gate_summary.json", gate)
 
-    # report
+
     report = [
         "# Task2 ACC Boost Report",
         "",
@@ -509,7 +508,7 @@ def main() -> int:
     ]
     (boost_dir / "acc_boost_report.md").write_text("\n".join(report), encoding="utf-8")
 
-    # optional relock
+
     if gate["relock_recommended"] and args.apply_relock and best_row is not None:
         base_name = str(best_row["candidate"]).split("@")[0]
         thr = float(thr_store.get(base_name, best_row.get("threshold", 0.5)))
@@ -527,7 +526,7 @@ def main() -> int:
         final_dir = output_dir / "final"
         final_dir.mkdir(parents=True, exist_ok=True)
         atomic_write_json(final_dir / "task2_final_config.json", lock)
-        # final validation
+
         val_idx = pd.read_csv(output_dir / "splits" / "final_validation_indices.csv")["sample_index"].astype(int)
         df_val = df.loc[val_idx].copy()
         y_val = build_target(df_val).to_numpy().astype(int)
@@ -544,13 +543,12 @@ def main() -> int:
         }
         if base_name in feat_map:
             feats, builder, use_miss, use_aux = feat_map[base_name]
-            # rebuild aux on full develop for test-time: train aux on all develop then transform val — for fair protocol
-            # Here: refit task2 model on develop with chosen features; for aux cols, use develop-trained full aux model approx:
-            # simplest: concatenate develop+val indices for aux would leak; instead train aux on develop only and predict val.
+
+
             df_tr = df_dev.copy()
             df_te = df_val.copy()
             if use_aux:
-                # train aux on full develop (no task2 label), predict val
+
                 from src.tasks.task2.cross_task_aux import _aux_base_features, _prepare_xy
                 from catboost import CatBoostClassifier as CBC, CatBoostRegressor as CBR
 
@@ -589,7 +587,7 @@ def main() -> int:
                     ("aux_t3_pred_score", pred_s),
                 ]:
                     df_te[col] = arr
-                # also need aux on train for fitting task2 model — use OOF aux already in df_aux
+
                 df_tr = df_aux.copy()
             if use_miss:
                 df_tr, _ = _make_missing_indicators(df_dev, feat_b)
@@ -637,7 +635,7 @@ def main() -> int:
     else:
         logger.info("KEEP majority M | gate=%s", gate)
 
-    # sync slim copy to results
+
     results_boost = ROOT / "results" / "task2" / "diagnostics" / "acc_boost"
     results_boost.mkdir(parents=True, exist_ok=True)
     for fname in (

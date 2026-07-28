@@ -1,5 +1,3 @@
-"""主程序：电动汽车消费者转型分析三任务入口。"""
-
 from __future__ import annotations
 
 import argparse

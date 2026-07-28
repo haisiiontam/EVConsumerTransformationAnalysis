@@ -1,5 +1,3 @@
-"""任务一每折 checkpoint：兼容包装 common.fold_checkpoints。"""
-
 from __future__ import annotations
 
 from pathlib import Path

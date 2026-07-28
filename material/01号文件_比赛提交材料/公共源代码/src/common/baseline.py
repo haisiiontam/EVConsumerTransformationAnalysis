@@ -1,5 +1,3 @@
-"""任务一 / 任务三共用的朴素基线训练流程（逻辑保持不变）。"""
-
 from __future__ import annotations
 
 import logging

@@ -1,5 +1,3 @@
-"""生成任务二论文用 Markdown 材料。"""
-
 from __future__ import annotations
 
 import json
@@ -24,7 +22,7 @@ def write_paper_reports(output_dir: Path, ctx: Dict[str, Any]) -> None:
     perm = ctx.get("permutation") or {}
     boot = ctx.get("bootstrap") or {}
 
-    # 尽量从磁盘补全统计摘要
+
     stats = Path(output_dir) / "statistics"
     if not perm and (stats / "permutation_summary.json").exists():
         perm = json.loads((stats / "permutation_summary.json").read_text(encoding="utf-8"))

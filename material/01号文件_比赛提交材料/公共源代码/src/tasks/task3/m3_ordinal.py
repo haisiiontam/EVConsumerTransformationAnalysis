@@ -1,5 +1,3 @@
-"""M3：有序评分学习（累积边界 + 10 类分布对照）。"""
-
 from __future__ import annotations
 
 import logging
@@ -44,7 +42,7 @@ def _fit_binary_safe(
 
     model = CatBoostClassifier(**params)
     fit_kw: Dict[str, Any] = {"cat_features": list(cats)}
-    # eval_set 也需要两类，否则 early stopping / Logloss 可能失败
+
     if len(np.unique(y_va)) >= 2:
         fit_kw["eval_set"] = (X_va, y_va)
         fit_kw["early_stopping_rounds"] = TASK3_EARLY_STOPPING_ROUNDS
@@ -82,7 +80,7 @@ def _fit_multiclass_safe(
         **params,
         "loss_function": "MultiClass",
         "eval_metric": "MultiClass",
-        # 不强制 classes_count：折内可能缺某些评分档
+
     }
     model = CatBoostClassifier(**mc_params)
     fit_kw: Dict[str, Any] = {"cat_features": list(cats)}
@@ -96,7 +94,7 @@ def _fit_multiclass_safe(
         ci = int(c)
         if 0 <= ci < n_classes:
             out[:, ci] = proba[:, i]
-    # 数值稳定：若某行全 0（不应发生），均匀分布
+
     row_sum = out.sum(axis=1, keepdims=True)
     miss = row_sum.ravel() <= 0
     if miss.any():
@@ -119,7 +117,7 @@ def oof_ordinal_score(
     sample_index = X_dev.index.to_numpy().astype(int)
     n = len(X_dev)
 
-    # 累积边界：score >= k for k=2..10
+
     thresholds = list(range(2, 11))
     cum_oof = np.zeros((n, len(thresholds)), dtype=float)
     dist_oof = np.zeros((n, 10), dtype=float)
@@ -148,15 +146,15 @@ def oof_ordinal_score(
             y_va = (score[va] >= thr).astype(int)
             cum_oof[va, j] = _fit_binary_safe(X_tr, y_tr, X_va, y_va, cats, params)
 
-        # 10-class distribution（标签 0..9）
+
         y_mc_tr = score[tr] - 1
         y_mc_va = score[va] - 1
         dist_oof[va] = _fit_multiclass_safe(X_tr, y_mc_tr, X_va, y_mc_va, cats, params, n_classes=10)
 
     cum_oof = _enforce_monotone_cum(cum_oof)
-    # P(score > 5) = P(score >= 6)
+
     p_ge6 = cum_oof[:, thresholds.index(6)]
-    p_dist = dist_oof[:, 5:].sum(axis=1)  # scores 6..10
+    p_dist = dist_oof[:, 5:].sum(axis=1)
 
     acc_cum = float(((p_ge6 >= 0.5).astype(int) == y).mean())
     acc_dist = float(((p_dist >= 0.5).astype(int) == y).mean())

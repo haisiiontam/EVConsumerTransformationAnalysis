@@ -1,5 +1,3 @@
-"""任务三标签、安全特征与机制特征组。"""
-
 from __future__ import annotations
 
 import logging
@@ -172,7 +170,7 @@ def feature_sets(df: pd.DataFrame) -> Dict[str, List[str]]:
         for c in cols:
             if c in probe.columns and c not in all_mech and c not in TASK3_EXCLUDED_FEATURES:
                 all_mech.append(c)
-    # 兼容旧稳定机制列名
+
     for c in TASK3_MECHANISM_FEATURES:
         if c in probe.columns and c not in all_mech:
             all_mech.append(c)

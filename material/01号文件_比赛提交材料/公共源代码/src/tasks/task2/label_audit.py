@@ -1,5 +1,3 @@
-"""任务二标签质量审计（不修改标签）。"""
-
 from __future__ import annotations
 
 import logging
@@ -36,7 +34,7 @@ def duplicate_conflicts(
     """完全相同安全特征行但标签冲突。"""
     state = fit_tabular(df, features, scale=False)
     X = transform_tabular(df, state)
-    # 离散化后找重复
+
     key_df = pd.DataFrame(X).round(6)
     key_df["y"] = y.values
     grp = key_df.groupby(list(range(X.shape[1])), dropna=False)["y"].agg(["count", "nunique", "mean"])
@@ -102,12 +100,12 @@ def knn_label_consistency(
     nn = NearestNeighbors(n_neighbors=max(ks) + 1, metric="euclidean")
     nn.fit(X)
     dist, idx = nn.kneighbors(X)
-    # 去掉自身（第一邻居）
+
     idx = idx[:, 1:]
 
     for k in ks:
         neighbor_labels = y_arr[idx[:, :k]]
-        # 多数投票一致率
+
         mode_pred = (neighbor_labels.mean(axis=1) >= 0.5).astype(int)
         knn_acc = float((mode_pred == y_arr).mean())
         rows.append(
@@ -134,7 +132,7 @@ def _try_cleanlab(
         logger.info("cleanlab 未安装，跳过 label issue 检测")
         return None
     X, _ = _prepare_matrix(df, features)
-    # 用全局先验作为弱概率
+
     p = np.full(len(y), float(y.mean()))
     issues = find_label_issues(y.to_numpy(), p.reshape(-1, 1))
     out = pd.DataFrame({"sample_index": df.index.astype(int), "is_label_issue": issues})

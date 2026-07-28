@@ -1,5 +1,3 @@
-"""M1：CatBoost 二分类 + 可选 Optuna。"""
-
 from __future__ import annotations
 
 import logging
@@ -142,7 +140,7 @@ def run_optuna_catboost(
 
     optuna.logging.set_verbosity(optuna.logging.WARNING)
     y = y_dev.to_numpy().astype(int)
-    # 粗搜：用前 coarse folds
+
     coarse_folds = list(range(min(TASK3_OPTUNA_COARSE_FOLDS, int(fold_assign.max()) + 1)))
 
     def objective(trial: "optuna.Trial") -> float:
@@ -182,7 +180,7 @@ def run_optuna_catboost(
         trials_rows.append({"trial": t.number, "accuracy": t.value, **(t.params or {})})
     atomic_write_csv(output_dir / "catboost_trials.csv", pd.DataFrame(trials_rows))
 
-    # Top5 完整 5 折确认
+
     top = sorted(study.trials, key=lambda t: (t.value is not None, t.value or -1), reverse=True)[:5]
     conf_rows = []
     best_params = dict(TASK3_CATBOOST_COMMON)

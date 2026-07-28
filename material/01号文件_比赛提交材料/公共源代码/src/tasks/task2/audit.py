@@ -1,5 +1,3 @@
-"""任务二输出完整性审计与旧 run 归档。"""
-
 from __future__ import annotations
 
 import json
@@ -148,7 +146,7 @@ def run_audit(output_dir: Path) -> Dict[str, Any]:
     }
     atomic_write_json(audit_dir / "stage_audit.json", summary)
 
-    # 诊断侧审计文件（与 pipeline 中写入一致，audit-only 时也生成）
+
     diag = output_dir / "diagnostics"
     diag.mkdir(parents=True, exist_ok=True)
     atomic_write_json(

@@ -1,5 +1,3 @@
-"""泛化 Stage 调度：start/stop、skip、run_state 同步。"""
-
 from __future__ import annotations
 
 import logging

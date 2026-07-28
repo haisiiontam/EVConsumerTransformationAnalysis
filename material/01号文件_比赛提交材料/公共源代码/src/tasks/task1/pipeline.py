@@ -1,5 +1,3 @@
-"""任务一全量优化主流程（quick / full / resume）。"""
-
 from __future__ import annotations
 
 import json
@@ -76,7 +74,7 @@ logger = logging.getLogger(__name__)
 
 
 def _normalize_y(df: pd.DataFrame) -> pd.Series:
-    from src.tasks.task1.features import to_num  # noqa: F401
+    from src.tasks.task1.features import to_num
 
     s = df[TASK1_TARGET]
     cleaned = s.astype(str).str.strip().str.lower()
@@ -237,7 +235,7 @@ def run(
         audit_only=False,
         completed_stages=completed_from_audit(audit_summary),
     )
-    # resume 默认跳过已完成 optuna
+
     if resume and not skip_optuna:
         if "catboost_optuna" in opts.completed_stages and "lightgbm_optuna" in opts.completed_stages:
             opts.skip_optuna = True
@@ -271,7 +269,7 @@ def run(
         )
     except KeyboardInterrupt:
         state.data["exit_status"] = "interrupted"
-        # 标记最近 running stage 为 partial
+
         for st_name, st_info in list(state.data.get("stages", {}).items()):
             if st_info.get("status") == "running":
                 state.partial(st_name, error="KeyboardInterrupt")
@@ -306,7 +304,7 @@ def _run_body(
 ) -> Dict[str, Any]:
     save_json(uncertain_feature_report(df), output_dir / "diagnostics" / "uncertain_features.json")
 
-    # ---- 冻结划分 ----
+
     split_ok = (
         (output_dir / "splits" / "develop_indices.csv").exists()
         and (output_dir / "splits" / "final_validation_indices.csv").exists()
@@ -326,7 +324,7 @@ def _run_body(
         y_dev_np = y_dev.reset_index(drop=True)
         y_val_np = y_val.reset_index(drop=True)
         folds42 = make_folds(y_dev, n_folds, RANDOM_SEED)
-        # 校验 fold 与磁盘一致
+
         fold_disk = pd.read_csv(output_dir / "splits" / "fold_assignment_seed42.csv")
         fa = _fold_assign_array(folds42, len(y_dev))
         if not np.array_equal(fa, fold_disk["fold"].to_numpy()):
@@ -360,7 +358,7 @@ def _run_body(
     model_probas: Dict[str, np.ndarray] = {}
     optuna_db = output_dir / "tuning" / "task1_optuna.db"
 
-    # ---- 基线复现：原稳定逻辑 B / 旧机制C / A，取最优 ----
+
     baseline_params = default_catboost_params(RANDOM_SEED)
     best_base_pack = None
     m_b_val: Dict[str, Any] = {}
@@ -477,9 +475,9 @@ def _run_body(
         gate.complete("baseline")
 
     assert best_base_pack is not None
-    from src.tasks.task1.catboost_models import _align_proba  # noqa: F401
+    from src.tasks.task1.catboost_models import _align_proba
 
-    # ---- 特征消融 / 选择 ----
+
     feat_sel_path = output_dir / "ablation" / "feature_selection.json"
     if not gate.should_execute("ablation") and not gate.should_execute("feature_selection") and feat_sel_path.exists():
         logger.info("load feature_selection.json")
@@ -544,7 +542,7 @@ def _run_body(
         logger.info("最终特征数=%d | kept_groups=%s", len(feat_final), kept_groups)
         gate.complete("feature_selection")
 
-    # ---- CatBoost Optuna + confirmation ----
+
     m1_params_path = output_dir / "tuning" / "m1_best_params.json"
     trials_path = output_dir / "tuning" / "optuna_catboost_trials.csv"
     top5_path = output_dir / "tuning" / "optuna_catboost_top5_cv.csv"
@@ -598,7 +596,7 @@ def _run_body(
                 output_dir / "tuning" / "optuna_catboost_skipped_quick.csv", index=False
             )
 
-    # ---- M1 OOF（checkpoint / 已落盘则直接加载）----
+
     m1_oof_path = output_dir / "oof" / "m1_oof_predictions.csv"
     gate.begin("m1_catboost")
     iters_m1: List[int] = []
@@ -640,7 +638,7 @@ def _run_body(
         state.save()
         return {"task_name": "task1", "accuracy": float("nan"), "stopped_after": "m1_catboost", "mode": mode}
 
-    # ---- M2 ----
+
     m2_oof_path = output_dir / "oof" / "m2_oof_predictions.csv"
     gate.begin("m2_ordinal")
     if m2_oof_path.exists() and opts.resume:
@@ -671,7 +669,7 @@ def _run_body(
         state.save()
         return {"task_name": "task1", "accuracy": float("nan"), "stopped_after": "m2_ordinal", "mode": mode}
 
-    # ---- M3 ----
+
     m3_oof_path = output_dir / "oof" / "m3_oof_predictions.csv"
     m3_score_path = output_dir / "oof" / "m3_oof_scores.csv"
     m3_thr_path = output_dir / "tuning" / "m3_threshold_temp.json"
@@ -712,7 +710,7 @@ def _run_body(
     model_probas["M3_reg_soft"] = oof_m3
     gate.complete("m3_regression", completed_folds=list(range(n_folds)))
 
-    # ---- LightGBM optuna + OOF ----
+
     lgb_params = None
     lgb_trials_path = output_dir / "tuning" / "optuna_lgbm_trials.csv"
     if HAS_LGBM:
@@ -820,7 +818,7 @@ def _run_body(
     )
     gate.complete("logistic")
 
-    # ---- 互补性 / 软融合 / stacking / bias ----
+
     locked_cfg_path = output_dir / "task1_final_config.json"
     soft_path = output_dir / "ensemble" / "soft_vote_best.json"
     bias_path = output_dir / "ensemble" / "class_bias_best.json"
@@ -842,7 +840,7 @@ def _run_body(
             if bias_path.exists()
             else {"bias_Low": 0.0, "bias_Medium": 0.0, "bias_High": 0.0}
         )
-        # 用已保存权重重建 soft_p
+
         weights = soft_best.get("weights", {})
         parts, wsum = [], 0.0
         for n, w in weights.items():
@@ -890,7 +888,7 @@ def _run_body(
         div_df.to_csv(output_dir / "ensemble" / "diversity_summary.csv", index=False, encoding="utf-8-sig")
         gate.complete("diversity")
 
-        # 融合候选：排除明显弱且无互补价值的模型（仍保留 diversity 表）
+
         fuse_models = {
             k: v
             for k, v in model_probas.items()
@@ -934,7 +932,7 @@ def _run_body(
         module_scores["class_bias"] = {"accuracy": bias_best["accuracy"], "note": f"on {cand_name}"}
         save_json(bias_best, output_dir / "ensemble" / "class_bias_best.json")
         gate.complete("class_bias")
-        # ---- 选择最终 OOF 方案 ----
+
         final_candidates = {
             "baseline": model_probas["baseline"],
             "M1_catboost": oof_m1,
@@ -958,7 +956,7 @@ def _run_body(
         chosen_m = evaluate_multiclass(y_dev_np, pred_from_proba(chosen_p), chosen_p)
         logger.info("OOF 锁定候选：%s Acc=%.4f", chosen_name, chosen_m["accuracy"])
 
-    # ---- 多 seed 稳定性 ----
+
     stab_focus = ["baseline", "M1_catboost", "M2_ordinal", "soft_vote"]
     if chosen_name == "stacking":
         stab_focus.append("stacking")
@@ -987,7 +985,7 @@ def _run_body(
         else (TASK1_STABILITY_SEEDS if mode == "full" else [RANDOM_SEED])
     ):
         folds_s = make_folds(y_dev, n_folds, seed)
-        # 各模型 OOF
+
         p_base_s, _, _, _ = oof_catboost_multiclass(
             df_dev, y_dev, best_base_pack["features"], folds_s, {**baseline_params, "random_seed": seed}, tag=f"base_s{seed}"
         )
@@ -997,7 +995,7 @@ def _run_body(
         p_m2_s, _, _ = oof_ordinal_catboost(
             df_dev, y_dev, feat_final, folds_s, params={"random_seed": seed}, tag=f"m2_s{seed}"
         )
-        # soft: 用当前 seed 下可用树模型重搜权重太贵；改用固定权重作用于 m1/m2/base
+
         weights = soft_best.get("weights", {})
         parts = []
         wsum = 0.0
@@ -1005,10 +1003,10 @@ def _run_body(
             "baseline": p_base_s,
             "M1_catboost": p_m1_s,
             "M2_ordinal": p_m2_s,
-            "M3_reg_soft": p_m1_s,  # 回归软概率跨 seed 成本高，退化用 M1 近似
-            "M6_ord_logit": p_m2_s,  # 同上，用序数边界近似
+            "M3_reg_soft": p_m1_s,
+            "M6_ord_logit": p_m2_s,
         }
-        # 若软融合含 lgbm 等，缺失则重归一化
+
         for name, w in weights.items():
             if name in mapping and w > 0:
                 parts.append(w * mapping[name])
@@ -1040,7 +1038,7 @@ def _run_body(
                 continue
             p = pack_s[name]
             met = evaluate_multiclass(y_dev_np, pred_from_proba(p), p)
-            # 折级
+
             fold_ids = np.full(len(y_dev_np), -1)
             for fid, (_, va) in enumerate(folds_s):
                 fold_ids[va] = fid
@@ -1119,7 +1117,7 @@ def _run_body(
         base_stab = pd.DataFrame()
         stable_ok = False
 
-    # ---- 锁定配置 ----
+
     final_config = {
         "chosen_oof_name": chosen_name,
         "features": feat_final,
@@ -1141,7 +1139,7 @@ def _run_body(
     save_json(final_config, output_dir / "task1_final_config.json")
     save_json(final_config, output_dir / "tuning" / "task1_final_config.json")
 
-    # ---- 最终验证只一次 ----
+
     fv_metrics_path = output_dir / "final_validation" / "metrics.json"
     fv_model_path = output_dir / "final_validation" / "model_m1.cbm"
     skip_final_retrain = (
@@ -1351,7 +1349,7 @@ def _run_body(
         model_final.save_model(str(output_dir / "final_validation" / "model_m1.cbm"))
         gate.complete("final_validation")
 
-    # ---- SHAP（独立子进程，原生崩溃不拖垮主流程）----
+
     if mode == "full" and gate.should_execute("shap") and not opts.skip_shap:
         gate.begin("shap")
         logger.info("=== SHAP ===")
@@ -1367,8 +1365,8 @@ def _run_body(
             atomic_write_json(feat_json, list(feat_final))
             atomic_write_json(params_json, dict(params_final))
             worker = Path(__file__).resolve().parents[2] / "scripts" / "run_task1_shap_worker.py"
-            # parents: task1 -> tasks -> src -> repo? Path(__file__)=.../src/tasks/task1/pipeline.py
-            # parents[0]=task1, [1]=tasks, [2]=src, [3]=repo
+
+
             worker = Path(__file__).resolve().parents[3] / "scripts" / "run_task1_shap_worker.py"
             cmd = [
                 sys.executable,
@@ -1388,7 +1386,7 @@ def _run_body(
                 "--max-samples",
                 "200",
             ]
-            # 用绝对 data 路径：优先从 output 旁推仓库根
+
             repo_root = Path(__file__).resolve().parents[3]
             data_path = repo_root / "dataSetB.csv"
             if data_path.exists():
@@ -1414,7 +1412,7 @@ def _run_body(
     elif opts.skip_shap:
         logger.info("skip shap")
 
-    # ---- 论文报告 ----
+
     gate.begin("report")
     formal = [chosen_name, "M1_catboost"]
     paper_only = [k for k in module_scores if k not in formal and k != "baseline_stable"]
@@ -1449,7 +1447,7 @@ def _run_body(
         },
     )
 
-    # 兼容根目录别名
+
     if cm_df is not None:
         cm_df.to_csv(output_dir / "confusion_matrix.csv", encoding="utf-8-sig")
     elif (output_dir / "final_validation" / "confusion_matrix.csv").exists():

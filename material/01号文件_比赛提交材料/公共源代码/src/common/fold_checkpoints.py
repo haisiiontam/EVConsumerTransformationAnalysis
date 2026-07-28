@@ -1,5 +1,3 @@
-"""每折原子 checkpoint：支持多分类 / 二分类概率列。"""
-
 from __future__ import annotations
 
 import json
@@ -14,9 +12,9 @@ from src.common.io_utils import atomic_write_csv, atomic_write_json
 
 logger = logging.getLogger(__name__)
 
-# 任务一默认
+
 PROB_COLS_MULTICLASS = ("prob_Low", "prob_Medium", "prob_High")
-# 任务三默认
+
 PROB_COLS_BINARY = ("prob_0", "prob_1")
 
 
@@ -93,7 +91,7 @@ def save_fold_checkpoint(
         data["true_label"] = y_true
     proba = np.asarray(proba)
     if proba.ndim == 1:
-        # binary p1 only
+
         data["prob_0"] = 1.0 - proba
         data["prob_1"] = proba
         used_cols = ("prob_0", "prob_1")

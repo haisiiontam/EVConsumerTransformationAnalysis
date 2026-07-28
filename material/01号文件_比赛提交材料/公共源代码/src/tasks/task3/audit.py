@@ -1,5 +1,3 @@
-"""任务三输出完整性审计。"""
-
 from __future__ import annotations
 
 import json
@@ -16,7 +14,7 @@ from src.config import TASK3_STAGES
 
 logger = logging.getLogger(__name__)
 
-# 关键产物 → 推断 stage
+
 ARTIFACT_MAP: List[Tuple[str, str, str]] = [
     ("splits/develop_indices.csv", "split", "required"),
     ("splits/final_validation_indices.csv", "split", "required"),
@@ -42,7 +40,7 @@ ARTIFACT_MAP: List[Tuple[str, str, str]] = [
     ("explain/shap_summary.png", "shap", "optional"),
     ("paper/task3_final_conclusion.md", "report", "optional"),
     ("test_predictions.csv", "submission", "optional"),
-    # 历史高级 run
+
     ("metrics.json", "legacy_metrics", "legacy"),
     ("tuning/best_config.json", "legacy_tuning", "legacy"),
 ]
@@ -110,7 +108,7 @@ def run_audit(output_dir: Path) -> Dict[str, Any]:
     rows = []
     for rel, stage, kind in ARTIFACT_MAP:
         p = output_dir / rel
-        # 也查归档
+
         p_arch = output_dir / "_archive" / "pre_full_optimize" / rel
         exists = p.exists()
         src = "current" if exists else ("archive" if p_arch.exists() else "missing")
@@ -149,7 +147,7 @@ def run_audit(output_dir: Path) -> Dict[str, Any]:
         else:
             stages[st] = {"status": "pending"}
 
-    # 读取历史基线摘要
+
     hist_paths = [
         output_dir / "metrics.json",
         output_dir / "_archive" / "pre_full_optimize" / "metrics.json",
@@ -167,7 +165,7 @@ def run_audit(output_dir: Path) -> Dict[str, Any]:
     first_resume = "split"
     for st in TASK3_STAGES:
         if st == "audit":
-            continue  # audit 每次都会跑，不作为续跑起点
+            continue
         if stages.get(st, {}).get("status") != "completed":
             first_resume = st
             break
@@ -180,7 +178,7 @@ def run_audit(output_dir: Path) -> Dict[str, Any]:
     }
     atomic_write_json(audit_dir / "stage_audit.json", summary)
 
-    # baseline summary md
+
     oof_acc = fin_acc = thr = None
     for j in hist.values():
         oof_acc = oof_acc or j.get("oof_accuracy")

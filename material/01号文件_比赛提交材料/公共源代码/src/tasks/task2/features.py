@@ -1,5 +1,3 @@
-"""任务二标签、安全特征与机制特征组 F1–F7。"""
-
 from __future__ import annotations
 
 import logging
@@ -18,7 +16,7 @@ from src.config import (
 
 logger = logging.getLogger(__name__)
 
-# 机制特征分组（F1–F7）：仅当源字段存在时纳入
+
 TASK2_MECH_GROUPS: Dict[str, List[str]] = {
     "F1_charging": [
         "charging_gap",
@@ -65,7 +63,7 @@ TASK2_MECH_GROUPS: Dict[str, List[str]] = {
     ],
 }
 
-# 数据集中缺失、但影响家庭充电的关键结构变量（文档用）
+
 UNOBSERVED_HOUSING_FIELDS: List[str] = [
     "private_parking_available",
     "garage_available",

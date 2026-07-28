@@ -1,5 +1,3 @@
-"""任务三折内预处理：CatBoost 原生类别 / 表模型级 One-Hot。"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field

@@ -1,5 +1,3 @@
-"""任务二可分性诊断阶段。"""
-
 from __future__ import annotations
 
 import logging

@@ -1,5 +1,3 @@
-"""任务二层次 Empirical Bayes 先验（折内拟合）。"""
-
 from __future__ import annotations
 
 import logging
@@ -100,7 +98,7 @@ def _fit_rates(
     keys_2: Sequence[str],
     alpha: float,
 ) -> Dict[str, Dict[str, float]]:
-    # y_tr 与 tr 行顺序对齐；groupby.groups 返回的是原始 index 标签
+
     y_s = pd.Series(np.asarray(y_tr).astype(int), index=tr.index)
     global_rate = float(y_s.mean())
     rates: Dict[str, Dict[str, float]] = {"global": {"__global__": global_rate}}
@@ -126,7 +124,7 @@ def _predict_row(
     keys_2: Sequence[str],
 ) -> float:
     global_rate = rates["global"]["__global__"]
-    # 2-way → 1-way → global 回退
+
     for key in keys_2:
         a, b = key.split("|")
         if a in row.index and b in row.index:

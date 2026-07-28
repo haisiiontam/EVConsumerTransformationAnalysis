@@ -1,5 +1,3 @@
-"""M1：CatBoost 多分类 + Optuna。"""
-
 from __future__ import annotations
 
 import json
@@ -36,9 +34,9 @@ try:
 
     optuna.logging.set_verbosity(optuna.logging.WARNING)
     HAS_OPTUNA = True
-except ImportError:  # pragma: no cover
+except ImportError:
     HAS_OPTUNA = False
-    optuna = None  # type: ignore
+    optuna = None
 
 
 def _align_proba(model: CatBoostClassifier, X: pd.DataFrame) -> np.ndarray:
@@ -79,7 +77,7 @@ def oof_catboost_multiclass(
         sample_index = list(range(n))
     sample_index = np.asarray(sample_index).astype(int)
 
-    # 若全部 fold 已完整，直接组装
+
     if checkpoint_dir is not None and resume_folds:
         ckpt = Path(checkpoint_dir)
         if all(fold_is_complete(ckpt, fid, expected_n=len(va)) for fid, (_, va) in enumerate(folds)):
@@ -213,7 +211,7 @@ def optuna_search_catboost(
 
     n_trials = n_trials or TASK1_OPTUNA_TRIALS_CB
 
-    # 若 CSV 已完整，直接复用，绝不重跑
+
     if existing_trials_csv is not None and Path(existing_trials_csv).exists():
         trials_df = pd.read_csv(existing_trials_csv)
         if "trial" in trials_df.columns and trials_df["trial"].nunique() >= n_trials:

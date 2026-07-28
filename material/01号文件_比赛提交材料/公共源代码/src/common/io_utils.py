@@ -1,5 +1,3 @@
-"""原子写入、运行状态与文件日志（任务一/三共用）。"""
-
 from __future__ import annotations
 
 import hashlib
@@ -118,7 +116,7 @@ def setup_file_logging(
     ffh.setLevel(logging.INFO)
     ffh.setFormatter(fmt)
     setattr(ffh, handler_attr, True)
-    ffh._task1_file = True  # type: ignore[attr-defined]  # 兼容任务一旧标记
+    ffh._task1_file = True
     root.addHandler(ffh)
 
     if not any(

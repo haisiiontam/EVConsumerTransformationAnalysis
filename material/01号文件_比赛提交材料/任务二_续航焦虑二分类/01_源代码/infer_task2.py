@@ -1,4 +1,3 @@
-"""任务二推理：多数类常数分类器"""
 from __future__ import annotations
 
 import argparse

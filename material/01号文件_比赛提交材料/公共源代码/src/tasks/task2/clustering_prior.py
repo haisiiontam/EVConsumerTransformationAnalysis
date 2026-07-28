@@ -1,5 +1,3 @@
-"""任务二无监督分群 + 折内群体先验。"""
-
 from __future__ import annotations
 
 import logging
@@ -135,7 +133,7 @@ def run_clustering_prior(
     }
     atomic_write_json(out / "cluster_best_config.json", cfg)
 
-    # 画像：在全 develop 上用 best_k 仅作描述（非正式选型）
+
     try:
         state = fit_tabular(df_dev, features, scale=True)
         X = transform_tabular(df_dev, state)

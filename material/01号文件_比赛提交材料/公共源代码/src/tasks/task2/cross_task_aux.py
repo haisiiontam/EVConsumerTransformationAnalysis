@@ -1,5 +1,3 @@
-"""任务二跨任务安全 OOF 表征：绝不用其他任务真标签作输入。"""
-
 from __future__ import annotations
 
 import logging
@@ -39,10 +37,10 @@ def _aux_base_features(df: pd.DataFrame) -> List[str]:
     for c in TASK2_SAFE_CANDIDATE_FEATURES:
         if c in df.columns and c not in ban and c not in cols:
             cols.append(c)
-    # 任务一辅助可用焦虑分（问卷），但不把任务一真标签当输入
+
     for c in ("range_anxiety_score", "monthly_energy_consumption_kwh", "monthly_charging_cost"):
         if c in df.columns and c not in ban and c not in cols:
-            # 能耗/费用可能后验：辅助模型仍排除，仅允许 range_anxiety_score
+
             if c == "range_anxiety_score":
                 cols.append(c)
     return cols
@@ -82,7 +80,7 @@ def generate_cross_task_oof_features(
     T3-aux: 回归 range_anxiety_score + 映射 P(score>5)
     """
     feats = _aux_base_features(df_dev)
-    # T1 目标：不得把 home_charging 当特征（已排除）
+
     if TASK1_TARGET not in df_dev.columns:
         raise ValueError(f"missing {TASK1_TARGET} for T1-aux target")
     if TASK3_SOURCE_SCORE not in df_dev.columns:
@@ -107,7 +105,7 @@ def generate_cross_task_oof_features(
         va = fold_assign == fold_id
         tr = ~va
         X_tr, X_va = X_all.loc[tr], X_all.loc[va]
-        # --- T1 multiclass ---
+
         clf = CatBoostClassifier(
             loss_function="MultiClass",
             iterations=250,
@@ -129,7 +127,7 @@ def generate_cross_task_oof_features(
             proba[:, -1] if proba.shape[1] > 2 else 0.0
         )
 
-        # --- T3: regress score + binary clf for P(high anxiety) ---
+
         reg = CatBoostRegressor(
             loss_function="RMSE",
             iterations=250,
@@ -139,7 +137,7 @@ def generate_cross_task_oof_features(
             verbose=False,
             allow_writing_files=False,
         )
-        # T3-aux 输入需排除 range_anxiety_score 本身（目标）
+
         feat_t3 = [c for c in feats if c != TASK3_SOURCE_SCORE]
         X3, cat3 = _prepare_xy(df_dev, feat_t3)
         reg.fit(X3.loc[tr], score.loc[tr].fillna(score.loc[tr].median()), cat_features=cat3 or None)

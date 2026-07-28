@@ -1,5 +1,3 @@
-"""导出三任务提交用模型文件（基于锁定配置，在 develop 上重训可部署权重）。"""
-
 from __future__ import annotations
 
 import json
@@ -54,7 +52,7 @@ def export_task1(out_dir: Path, data: Path) -> None:
     ge_high = np.array([1 if lab == "High" else 0 for lab in y_np], dtype=int)
     y_ord = np.array([{"Low": 0, "Medium": 1, "High": 2}[lab] for lab in y_np], dtype=float)
 
-    # M1 CatBoost multiclass
+
     state = fit_cat_preprocessor(df_dev, features)
     X = transform_cat(df_dev, state)
     m1 = CatBoostClassifier(**params)
@@ -62,7 +60,7 @@ def export_task1(out_dir: Path, data: Path) -> None:
     m1.save_model(str(out_dir / "task1_m1_catboost.cbm"))
     joblib.dump(state, out_dir / "task1_cat_prep_state.joblib")
 
-    # M3 ordinal regressor
+
     it_m3 = min(500, int(params.get("iterations", 500)))
     m3 = CatBoostRegressor(
         loss_function="RMSE",
@@ -77,7 +75,7 @@ def export_task1(out_dir: Path, data: Path) -> None:
     m3.fit(X, y_ord, cat_features=cat_indices(state))
     m3.save_model(str(out_dir / "task1_m3_regressor.cbm"))
 
-    # M6 dual ordinal logistic
+
     st_tab = fit_tabular_preprocessor(df_dev, features, scale=True)
     X_tab = transform_tabular(df_dev, st_tab)
     m6_a = LogisticRegression(max_iter=1000, random_state=RANDOM_SEED)

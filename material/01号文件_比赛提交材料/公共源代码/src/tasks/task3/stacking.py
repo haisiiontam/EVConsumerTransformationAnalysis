@@ -1,5 +1,3 @@
-"""二层 Stacking（元特征再次 5 折 OOF）。"""
-
 from __future__ import annotations
 
 import logging

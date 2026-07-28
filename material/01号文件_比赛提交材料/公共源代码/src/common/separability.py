@@ -1,5 +1,3 @@
-"""特征可分性诊断：单变量 AUC、类别目标率差距、弱信号判定与泄露风险探查。"""
-
 from __future__ import annotations
 
 import logging
@@ -48,7 +46,7 @@ def univariate_separability(
         if pd.api.types.is_numeric_dtype(series):
             score = pd.to_numeric(series, errors="coerce")
             auc = _safe_auc(y, score)
-            # 两类均值差（标准化）
+
             m0 = score[y == 0].mean()
             m1 = score[y == 1].mean()
             std = score.std()
@@ -56,7 +54,7 @@ def univariate_separability(
             rate_gap = float("nan")
             nunique = int(score.nunique(dropna=True))
         else:
-            # 类别：用目标率编码仅用于诊断 AUC（不是模型输入）
+
             tmp = pd.DataFrame({"cat": series.astype(str).fillna("Unknown"), "y": y.values})
             rates = tmp.groupby("cat")["y"].mean()
             score = tmp["cat"].map(rates)
@@ -150,7 +148,7 @@ def assess_weak_signal(
         if len(separability_df) and separability_df["auc_gap_from_0_5"].notna().any()
         else 0.0
     )
-    # 其他任务目标列：禁止使用，其编码 AUC 不计入“可用泄露信号”
+
     other_task_labels = {"ev_adoption_likelihood", "range_anxiety_score"}
     leak_usable = leak_df[
         ~leak_df["feature"].isin(other_task_labels) & leak_df["available"].fillna(False)

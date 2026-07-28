@@ -1,5 +1,3 @@
-"""任务三全量优化流水线：分类 / 回归 / 有序 / 异构集成 + 断点续跑。"""
-
 from __future__ import annotations
 
 import json
@@ -303,7 +301,7 @@ def run(
     maj = majority_baseline(y_all)
     save_json(maj, output_dir / "diagnostics" / "majority_baseline.json")
 
-    # leakage audit artifacts
+
     atomic_write_json(
         output_dir / "diagnostics" / "leakage_audit.json",
         {
@@ -328,7 +326,7 @@ def run(
     feat_a, feat_b, feat_c = sets["A_official"], sets["B_safe_raw"], sets["C_safe_plus_mechanism"]
     assert_no_leakage(feat_c)
 
-    # splits 始终加载/冻结（后续阶段依赖）；resume 已完成则只读
+
     if gate.should_execute("split"):
         gate.begin("split")
     df_dev, df_val, y_dev, y_val, fold_assign = _freeze_or_load_splits(
@@ -349,7 +347,7 @@ def run(
     final_acc = float("nan")
     pred_score_oof: Optional[np.ndarray] = None
 
-    # resume 时从磁盘回填，避免 --start-stage 跳过已完成阶段后丢失 OOF/特征
+
     def _load_oof(path: Path, key: str) -> None:
         if path.exists():
             model_oofs[key] = pd.read_csv(path)
@@ -382,7 +380,7 @@ def run(
             logger.warning("hydrate m1_params failed: %s", e)
     _load_oof(output_dir / "baseline" / "baseline_oof_predictions.csv", "baseline")
     _load_oof(output_dir / "oof" / "m1_oof_predictions.csv", "M1")
-    _load_oof(output_dir / "oof" / "m1_tuned_oof_predictions.csv", "M1")  # tuned 覆盖
+    _load_oof(output_dir / "oof" / "m1_tuned_oof_predictions.csv", "M1")
     _load_oof(output_dir / "models" / "m2_regression_oof.csv", "M2")
     _load_oof(output_dir / "models" / "m3_ordinal_oof.csv", "M3")
     _load_oof(output_dir / "oof" / "lgbm_oof_predictions.csv", "M4")
@@ -400,7 +398,7 @@ def run(
         )
         best_scheme = "M1_tuned" if (output_dir / "oof" / "m1_tuned_oof_predictions.csv").exists() else "M1"
 
-    # ---- baseline ----
+
     if gate.should_execute("baseline"):
         gate.begin("baseline")
         oof_b, folds_b, _ = oof_catboost_binary(
@@ -452,16 +450,16 @@ def run(
         best_scheme = "baseline_B"
         gate.complete("baseline", oof_accuracy=oof_acc)
 
-    # ---- separability ----
+
     if gate.should_execute("separability"):
         gate.begin("separability")
         df_fe = add_mechanism_features(df_dev)
         sep_cols = [c for c in feat_c if c in df_fe.columns]
         sep = univariate_separability(df_fe, y_dev, sep_cols)
         atomic_write_csv(output_dir / "diagnostics" / "separability.csv", sep)
-        # score boundary analysis
+
         sc = raw_score(df_dev).to_numpy()
-        # need probs: use baseline if available
+
         p1 = best_p1 if best_p1 is not None else np.full(len(df_dev), 0.5)
         rows = []
         for s in range(1, 11):
@@ -495,7 +493,7 @@ def run(
         atomic_write_csv(output_dir / "diagnostics" / "target_distribution.csv", td)
         gate.complete("separability")
 
-    # ---- feature ablation ----
+
     if gate.should_execute("feature_ablation"):
         gate.begin("feature_ablation")
         candidates = group_feature_lists(feat_b, sets["mechanism_only_pool"])
@@ -505,7 +503,7 @@ def run(
         best_abl_name, best_abl_acc = "B_safe_raw", -1.0
         best_abl_feats = feat_b
         for name, feats in candidates.items():
-            # quick: only A/B/C
+
             if mode == "quick" and name not in {"A_official", "B_safe_raw", "C_safe_plus_mechanism"}:
                 continue
             assert_no_leakage(feats)
@@ -547,7 +545,7 @@ def run(
         )
         gate.complete("feature_ablation", selected=best_abl_name)
 
-    # ---- feature_selection (record) ----
+
     if gate.should_execute("feature_selection"):
         gate.begin("feature_selection")
         atomic_write_csv(
@@ -568,7 +566,7 @@ def run(
         )
         gate.complete("feature_selection")
 
-    # ---- M1 ----
+
     if gate.should_execute("m1_catboost_classifier"):
         gate.begin("m1_catboost_classifier")
         oof_m1, folds_m1, best_iters = oof_catboost_binary(
@@ -602,7 +600,7 @@ def run(
             output_dir / "tuning",
             quick=(mode == "quick"),
         )
-        # re-OOF with best params
+
         oof_m1, folds_m1, _ = oof_catboost_binary(
             df_dev,
             y_dev,
@@ -623,7 +621,7 @@ def run(
             best_scheme = "M1_tuned"
         gate.complete("m1_optuna")
 
-    # ---- M2 ----
+
     if gate.should_execute("m2_catboost_regressor"):
         gate.begin("m2_catboost_regressor")
         oof_m2, info_m2 = oof_regression_score(
@@ -652,7 +650,7 @@ def run(
             best_scheme = "M2"
         gate.complete("m2_catboost_regressor", **info_m2)
 
-    # ---- M3 ----
+
     if gate.should_execute("m3_ordinal_score"):
         gate.begin("m3_ordinal_score")
         try:
@@ -671,7 +669,7 @@ def run(
             logger.exception("m3_ordinal_score failed (continue): %s", e)
             gate.partial("m3_ordinal_score", error=str(e))
 
-    # ---- M4-M6 ----
+
     for stage, fn, key, out_name in [
         ("m4_lightgbm", oof_lightgbm, "M4", "lgbm"),
         ("m5_xgboost", oof_xgboost, "M5", "xgb"),
@@ -728,14 +726,14 @@ def run(
         )
         gate.complete("cross_task_aux", skipped=True)
 
-    # ---- diversity ----
+
     if gate.should_execute("diversity") and model_oofs:
         gate.begin("diversity")
         sc = raw_score(df_dev).to_numpy()
         diversity_report(model_oofs, sc, output_dir / "ensemble")
         gate.complete("diversity")
 
-    # ---- classifier-regressor fusion ----
+
     if gate.should_execute("classifier_regressor_fusion") and "M1" in model_oofs and "M2" in model_oofs:
         gate.begin("classifier_regressor_fusion")
         yv = model_oofs["M1"]["true_label"].to_numpy().astype(int)
@@ -766,7 +764,7 @@ def run(
             best_scheme = "clf_reg_fusion"
         gate.complete("classifier_regressor_fusion", **{k: v for k, v in best_f.items() if k != "weights"})
 
-    # ---- soft blend ----
+
     if gate.should_execute("soft_blend") and len(model_oofs) >= 2:
         gate.begin("soft_blend")
         base = model_oofs["M1"] if "M1" in model_oofs else next(iter(model_oofs.values()))
@@ -785,7 +783,7 @@ def run(
             best_scheme = "soft_blend"
         gate.complete("soft_blend", accuracy=best_s.get("accuracy"))
 
-    # ---- stacking ----
+
     if gate.should_execute("stacking") and len(model_oofs) >= 2:
         gate.begin("stacking")
         base = model_oofs["M1"] if "M1" in model_oofs else next(iter(model_oofs.values()))
@@ -811,12 +809,12 @@ def run(
             best_scheme = "stacking"
         gate.complete("stacking", **info_st)
 
-    # ---- calibration + threshold ----
+
     if gate.should_execute("calibration") and best_p1 is not None:
         gate.begin("calibration")
         yv = y_dev.to_numpy().astype(int)
         methods, compare = calibrate_oof(best_p1, yv, fold_assign)
-        # keep method that maximizes Acc
+
         best_name = compare.sort_values("accuracy", ascending=False).iloc[0]["method"]
         cal_p = methods[best_name]
         search, thr_cfg = search_threshold(cal_p, yv)
@@ -837,7 +835,7 @@ def run(
         oof_acc = float(thr_cfg["oof_accuracy"])
         gate.complete("threshold_postprocess", **thr_cfg)
 
-    # ---- multiseed (light) ----
+
     if gate.should_execute("multiseed"):
         gate.begin("multiseed")
         rows = []
@@ -860,7 +858,7 @@ def run(
         atomic_write_csv(output_dir / "oof" / "stability_seeds.csv", pd.DataFrame(rows))
         gate.complete("multiseed")
 
-    # ---- robustness ----
+
     if gate.should_execute("robustness"):
         gate.begin("robustness")
         lc = learning_curve(df_dev, y_dev, selected_features)
@@ -868,7 +866,7 @@ def run(
         persist_robustness(output_dir / "robustness", lc, noise)
         gate.complete("robustness")
 
-    # ---- final lock ----
+
     final_cfg = {
         "scheme": best_scheme,
         "features": selected_features,
@@ -896,7 +894,7 @@ def run(
         atomic_write_json(output_dir / "tuning" / "task3_final_config.json", final_cfg)
         gate.complete("final_lock")
 
-    # ---- final validation (once) ----
+
     metrics_out: Dict[str, Any] = {}
     if gate.should_execute("final_validation"):
         gate.begin("final_validation")
@@ -906,9 +904,8 @@ def run(
         model = CatBoostClassifier(**params)
         model.fit(X_tr, y_dev, cat_features=cat_indices(state_p))
         p_val = _prob1(model, transform_cat(df_val, state_p))
-        # If fusion/soft_blend selected, still deploy M1+threshold as locked simple predictor
-        # unless scheme is pure M2 — then use regressor path omitted for deploy simplicity:
-        # always ship CatBoost clf with locked features/params/threshold for reproducibility.
+
+
         y_pred = (p_val >= best_thr).astype(int)
         metrics = binary_classification_metrics(y_val, y_pred, p_val)
         final_acc = float(metrics["accuracy"])
@@ -948,7 +945,7 @@ def run(
         model.save_model(str(final_dir / "model.cbm"))
         gate.complete("final_validation", accuracy=final_acc)
 
-        # candidates table
+
         cand_rows = [{"scheme": best_scheme, "oof_accuracy": oof_acc, "final_accuracy": final_acc}]
         for k, oof in model_oofs.items():
             cand_rows.append(
@@ -962,7 +959,7 @@ def run(
             )
         atomic_write_csv(output_dir / "oof" / "final_candidates.csv", pd.DataFrame(cand_rows))
 
-    # ---- shap ----
+
     if gate.should_execute("shap"):
         gate.begin("shap")
         try:
@@ -984,7 +981,7 @@ def run(
         except Exception as e:
             gate.partial("shap", error=str(e))
 
-    # ---- report ----
+
     if gate.should_execute("report"):
         gate.begin("report")
         write_paper_reports(
@@ -999,7 +996,7 @@ def run(
         )
         gate.complete("report")
 
-    # ---- submission ----
+
     if gate.should_execute("submission") and test_df is not None:
         gate.begin("submission")
         state_all = fit_cat_preprocessor(df, selected_features)

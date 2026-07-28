@@ -1,5 +1,3 @@
-"""M4 LightGBM / M5 XGBoost / M6 序数 Logistic。"""
-
 from __future__ import annotations
 
 import json
@@ -36,7 +34,7 @@ try:
     HAS_LGBM = True
 except ImportError:
     HAS_LGBM = False
-    lgb = None  # type: ignore
+    lgb = None
 
 try:
     import xgboost as xgb
@@ -44,7 +42,7 @@ try:
     HAS_XGB = True
 except ImportError:
     HAS_XGB = False
-    xgb = None  # type: ignore
+    xgb = None
 
 try:
     import optuna
@@ -53,7 +51,7 @@ try:
     HAS_OPTUNA = True
 except ImportError:
     HAS_OPTUNA = False
-    optuna = None  # type: ignore
+    optuna = None
 
 
 def _y_codes(y: pd.Series) -> np.ndarray:
@@ -96,7 +94,7 @@ def oof_lgbm(
     }
     if params:
         base.update(params)
-    # 强制整型，避免 CSV/JSON 恢复后的 710.0
+
     for ik in ("n_estimators", "num_leaves", "min_child_samples", "random_state", "num_class"):
         if ik in base and base[ik] is not None:
             base[ik] = int(base[ik])
@@ -209,7 +207,7 @@ def optuna_lgbm(
                 best["verbose"] = -1
                 best["objective"] = "multiclass"
                 best["num_class"] = 3
-                # pandas 读 CSV 常把整数变成 float（如 710.0），LightGBM 会报错
+
                 best["n_estimators"] = int(best["n_estimators"])
                 return df_s, best
 

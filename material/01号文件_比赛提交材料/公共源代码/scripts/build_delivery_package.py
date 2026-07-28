@@ -1,5 +1,3 @@
-"""组装发给组长的两套交付包：01_比赛提交材料 + 02_论文写作素材。"""
-
 from __future__ import annotations
 
 import json
@@ -65,7 +63,7 @@ def format_predictions() -> None:
     for src, dst, cols, rename in mapping:
         df = pd.read_csv(src)
         out = df[cols].rename(columns=rename)
-        # 赛方格式：样本行号、真值类标签、预测类标签
+
         out = out.rename(
             columns={
                 "sample_index": "样本行号",
@@ -75,7 +73,7 @@ def format_predictions() -> None:
         )
         _ensure(dst.parent)
         out.to_csv(dst, index=False, encoding="utf-8-sig")
-        # 同时保留英文列版本便于程序读取
+
         eng = df[cols].rename(columns=rename)
         eng.to_csv(dst.with_name(dst.stem + "_en.csv"), index=False, encoding="utf-8-sig")
 
@@ -91,13 +89,13 @@ def copy_models() -> None:
 
 
 def copy_source() -> None:
-    # 公共源码
+
     for name in ["src", "scripts", "main.py", "requirements.txt", "pyproject.toml", "README.md"]:
         src = ROOT / name
         if src.exists():
             _copy(src, COMP / "公共源代码" / name)
 
-    # 任务级推理脚本（若已生成）
+
     infer_dir = ROOT / "delivery_staging" / "infer_scripts"
     if infer_dir.exists():
         for task, folder in [
@@ -109,7 +107,7 @@ def copy_source() -> None:
             if p.exists():
                 _copy(p, COMP / folder / task)
 
-    # 各任务指向公共代码的说明
+
     for task_name in [
         "任务一_EV采用意愿",
         "任务二_续航焦虑二分类",
@@ -246,7 +244,7 @@ python 任务三_支付意愿二分类/01_源代码/infer_task3.py --data dataSe
 """,
     )
 
-    # Per-task modeling reports
+
     _write(
         COMP / "任务一_EV采用意愿/04_建模报告.md",
         """# 任务一建模报告：EV 采用意愿（Low / Medium / High）
@@ -662,15 +660,15 @@ def build_paper_pack() -> None:
 
 ## 建议论文结构对应
 
-1. 问题与数据 → **E01** + 各任务 NOTE  
-2. 任务一方法与结果 → **B01–B03**（图优先用 B02）  
-3. 任务二弱信号论证 → **C01–C02**（必须强调“门控失败→多数类”）  
-4. 任务三方法与解释 → **D01–D03**  
+1. 问题与数据 → **E01** + 各任务 NOTE
+2. 任务一方法与结果 → **B01–B03**（图优先用 B02）
+3. 任务二弱信号论证 → **C01–C02**（必须强调“门控失败→多数类”）
+4. 任务三方法与解释 → **D01–D03**
 5. 总结成绩表 → **A01**
 """,
     )
 
-    # A01
+
     a01 = _ensure(PAPER / "A01_总成绩与锁定方案")
     _copy(ROOT / "results/README.md", a01 / "成绩总表_README.md")
     _write(
@@ -687,7 +685,7 @@ def build_paper_pack() -> None:
 """,
     )
 
-    # B01 docs
+
     b01 = PAPER / "B01_任务一_方法文档"
     for name in [
         "task1_methodology.md",
@@ -702,7 +700,7 @@ def build_paper_pack() -> None:
     ]:
         _copy(ROOT / "docs/task1" / name, b01 / name)
 
-    # B02 figures
+
     b02 = PAPER / "B02_任务一_图示SHAP与验证"
     _copy(ROOT / "results/task1/explain", b02 / "SHAP")
     _copy(ROOT / "results/task1/figures", b02 / "验证图")
@@ -721,7 +719,7 @@ def build_paper_pack() -> None:
 """,
     )
 
-    # B03 tables
+
     b03 = PAPER / "B03_任务一_配置与数值表"
     for rel in [
         "task1_final_config.json",
@@ -738,7 +736,7 @@ def build_paper_pack() -> None:
     ]:
         _copy(ROOT / "results/task1" / rel, b03 / Path(rel).name if "/" not in rel else b03 / rel)
 
-    # C01
+
     c01 = PAPER / "C01_任务二_弱信号文档"
     for name in [
         "task2_final_conclusion.md",
@@ -756,7 +754,7 @@ def build_paper_pack() -> None:
     ]:
         _copy(ROOT / "docs/task2" / name, c01 / name)
 
-    # C02
+
     c02 = PAPER / "C02_任务二_证据表与诊断"
     for rel in [
         "diagnostics/majority_baseline.json",
@@ -775,7 +773,7 @@ def build_paper_pack() -> None:
     ]:
         _copy(ROOT / "results/task2" / rel, c02 / Path(rel).name if "/" not in rel and (ROOT / "results/task2" / rel).is_file() else c02 / rel)
 
-    # C03
+
     c03 = PAPER / "C03_任务二_锁定配置"
     for rel in [
         "final/task2_final_config.json",
@@ -786,12 +784,12 @@ def build_paper_pack() -> None:
     ]:
         _copy(ROOT / "results/task2" / rel, c03 / Path(rel).name)
 
-    # D01
+
     d01 = PAPER / "D01_任务三_方法文档"
     for name in ["paper_focus.md", "final_conclusion.md", "NOTE.md"]:
         _copy(ROOT / "docs/task3" / name, d01 / name)
 
-    # D02
+
     d02 = PAPER / "D02_任务三_图示SHAP与验证"
     _copy(ROOT / "results/task3/explain", d02 / "SHAP")
     _copy(ROOT / "results/task3/final_validation", d02 / "验证图")
@@ -806,7 +804,7 @@ def build_paper_pack() -> None:
 """,
     )
 
-    # D03
+
     d03 = PAPER / "D03_任务三_配置与数值表"
     for rel in [
         "final/task3_final_config.json",
@@ -823,7 +821,7 @@ def build_paper_pack() -> None:
         src = ROOT / "results/task3" / rel
         _copy(src, d03 / (Path(rel).name if src.is_file() else rel))
 
-    # E01
+
     e01 = PAPER / "E01_数据概览"
     _copy(ROOT / "results/overview", e01 / "overview")
 
@@ -849,7 +847,7 @@ def main() -> int:
     format_predictions()
     copy_models()
     copy_source()
-    # copy infer into task folders after copy_source created dirs
+
     infer_dir = ROOT / "delivery_staging" / "infer_scripts"
     for task, folder in [
         ("infer_task1.py", "任务一_EV采用意愿/01_源代码"),

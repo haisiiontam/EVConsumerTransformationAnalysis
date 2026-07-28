@@ -1,5 +1,3 @@
-"""概率校准与阈值后处理（仅 OOF）。"""
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -44,7 +42,7 @@ def calibrate_oof(
 ) -> Tuple[Dict[str, np.ndarray], pd.DataFrame]:
     methods = {"none": p1.copy()}
     n_folds = int(fold_assign.max()) + 1
-    # Platt via LR on OOF folds
+
     p_platt = np.zeros_like(p1)
     p_iso = np.zeros_like(p1)
     for fold_id in range(n_folds):

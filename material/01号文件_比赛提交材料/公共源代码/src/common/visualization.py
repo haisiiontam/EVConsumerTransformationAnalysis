@@ -1,5 +1,3 @@
-"""可视化：混淆矩阵、特征重要性、概率分布与 ROC。"""
-
 from __future__ import annotations
 
 import logging
@@ -9,7 +7,7 @@ from typing import Sequence
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_curve

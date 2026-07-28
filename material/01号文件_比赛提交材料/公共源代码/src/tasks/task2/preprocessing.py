@@ -1,5 +1,3 @@
-"""任务二折内预处理：CatBoost 原生类别 / 表模型 One-Hot+StandardScaler。"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field

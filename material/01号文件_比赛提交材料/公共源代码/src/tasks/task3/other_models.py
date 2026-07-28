@@ -1,5 +1,3 @@
-"""M4 LightGBM / M5 XGBoost / M6 ExtraTrees / M7 GAM / M8 TabNet。"""
-
 from __future__ import annotations
 
 import logging

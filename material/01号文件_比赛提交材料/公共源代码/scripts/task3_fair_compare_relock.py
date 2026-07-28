@@ -1,5 +1,3 @@
-"""同冻结 split 公平对比：历史 clf_best_hp vs 当前 M1；按 OOF 最优阈值重锁 Final。"""
-
 from __future__ import annotations
 
 import json
@@ -32,7 +30,7 @@ def _enrich_hist_aliases(df: pd.DataFrame) -> pd.DataFrame:
         out["charging_convenience_index"] = out["charging_convenience"]
     if "weekly_minus_commute" in out.columns and "noncommute_km" not in out.columns:
         out["noncommute_km"] = out["weekly_minus_commute"]
-    # battery_x_knowledge_deficit / battery_over_access
+
     if "battery_replacement_concern" in out.columns and "knowledge_deficit" in out.columns:
         out["battery_x_knowledge_deficit"] = (
             pd.to_numeric(out["battery_replacement_concern"], errors="coerce")
@@ -66,7 +64,7 @@ def _train_eval_final(
     params: dict,
     threshold: float,
 ) -> dict:
-    # 用别名增强后的帧做预处理
+
     dev_e = _enrich_hist_aliases(df_dev)
     val_e = _enrich_hist_aliases(df_val)
     state = fit_cat_preprocessor(dev_e, features)
@@ -105,19 +103,19 @@ def main() -> int:
     y_dev, y_val = y.loc[idx_dev], y.loc[idx_val]
     fold_assign = np.array([fold_map[int(i)] for i in df_dev.index], dtype=int)
 
-    # --- current M1 ---
+
     cur_cfg = json.loads((out_dir / "final" / "task3_final_config.json").read_text(encoding="utf-8"))
     cur_feats = list(cur_cfg["features"])
     cur_params = dict(cur_cfg["m1_params"])
     oof_m1 = pd.read_csv(out_dir / "oof" / "m1_tuned_oof_predictions.csv")
-    # 对齐 develop index 顺序
+
     oof_m1 = oof_m1.set_index("sample_index").loc[df_dev.index].reset_index()
     search_cur, thr_cur = search_threshold(
         oof_m1["prob_1"].to_numpy(), oof_m1["true_label"].to_numpy()
     )
     atomic_write_csv(cmp_dir / "current_m1_threshold_search.csv", search_cur)
 
-    # --- historical clf_best_hp ---
+
     hist_meta = json.loads(
         (out_dir / "_archive" / "pre_full_optimize" / "tuning" / "best_config.json").read_text(
             encoding="utf-8"
@@ -151,7 +149,7 @@ def main() -> int:
     atomic_write_csv(cmp_dir / "hist_threshold_search.csv", search_hist)
 
     rows = []
-    # OOF rows
+
     for name, oof, thr_fixed, thr_best in [
         ("current_M1", oof_m1, 0.5, thr_cur["threshold"]),
         ("hist_clf_best_hp", oof_hist, hist_thr_old, thr_hist["threshold"]),
@@ -173,7 +171,7 @@ def main() -> int:
                 }
             )
 
-    # Final evaluations (same holdout)
+
     finals = {}
     for name, feats, params, thr_fixed, thr_tuned in [
         ("current_M1", cur_feats, cur_params, 0.5, float(thr_cur["threshold"])),
@@ -201,7 +199,7 @@ def main() -> int:
     cmp_df = pd.DataFrame(rows)
     atomic_write_csv(cmp_dir / "fair_compare_summary.csv", cmp_df)
 
-    # 选择：优先 OOF accuracy，同分优先 |thr-0.5| 更小；Final 只报告不调参
+
     oof_part = cmp_df[cmp_df["phase"] == "oof"].copy()
     oof_part = oof_part.sort_values(
         by=["accuracy", "balanced_accuracy"], ascending=[False, False]
@@ -211,10 +209,10 @@ def main() -> int:
     best_thr = float(best_oof["threshold"])
     best_policy = str(best_oof["threshold_policy"])
     deploy_key = f"{best_model}@{best_policy}"
-    # 若 best 是 oof_tuned，deploy 用对应 final；若 fixed 同理
+
     deploy = finals[deploy_key]
 
-    # 额外：当前 M1 + oof_tuned 若不是第一也单独记录
+
     cur_tuned = finals["current_M1@oof_tuned"]
     hist_tuned = finals["hist_clf_best_hp@oof_tuned"]
 
@@ -244,7 +242,7 @@ def main() -> int:
     }
     atomic_write_json(cmp_dir / "recommendation.json", recommendation)
 
-    # 重锁：采用 OOF 最优组合写回 final（不看 holdout 再调）
+
     if best_model == "current_M1":
         feats, params = cur_feats, cur_params
         scheme = f"current_M1_{best_policy}"
@@ -252,7 +250,7 @@ def main() -> int:
         feats, params = hist_feats, hist_params
         scheme = f"hist_clf_best_hp_{best_policy}"
 
-    # 重新训练部署模型（与 deploy 一致）
+
     deploy = _train_eval_final(df_dev, y_dev, df_val, y_val, feats, params, best_thr)
     maj = majority_baseline(y)
     final_cfg = {

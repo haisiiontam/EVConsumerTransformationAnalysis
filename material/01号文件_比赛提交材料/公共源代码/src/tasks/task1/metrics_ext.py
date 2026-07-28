@@ -1,5 +1,3 @@
-"""任务一扩展指标：QWK、相邻/跨级错误、统一评估。"""
-
 from __future__ import annotations
 
 from typing import Any, Dict, List, Sequence

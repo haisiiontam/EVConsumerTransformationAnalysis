@@ -1,5 +1,3 @@
-"""M3：有序回归 + 阈值映射 + Softmax 伪概率。"""
-
 from __future__ import annotations
 
 import logging
@@ -31,7 +29,7 @@ def score_to_label(score: np.ndarray, t_lm: float, t_mh: float) -> np.ndarray:
 
 
 def score_to_soft_proba(score: np.ndarray, temperature: float) -> np.ndarray:
-    # logit_k = -|pred - k| / T
+
     centers = np.array([0.0, 1.0, 2.0])
     logits = -np.abs(score.reshape(-1, 1) - centers.reshape(1, -1)) / max(temperature, 1e-6)
     logits = logits - logits.max(axis=1, keepdims=True)
@@ -75,7 +73,7 @@ def oof_ordinal_regressor(
         )
         pred = model.predict(X_va)
         oof_score[va] = pred
-        # 临时用 0.5/1.5 看折内
+
         lab = score_to_label(pred, 0.5, 1.5)
         m = evaluate_multiclass(y_pos.iloc[va], lab)
         fold_rows.append({"fold": fold_id, "model": tag, "accuracy@0.5_1.5": m["accuracy"]})

@@ -1,5 +1,3 @@
-"""任务二异构模型：LightGBM / XGBoost / ExtraTrees。"""
-
 from __future__ import annotations
 
 import logging
