@@ -1,4 +1,4 @@
-﻿sample_index,true_label,pred_label
+﻿样本行号,真值类标签,预测类标签
 37112,1,1
 40747,1,1
 31839,0,1

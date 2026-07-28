@@ -1,7 +1,7 @@
 # Task3 Boost Continue
 
 - Previous: OOF `0.86185` / Final `0.8528`
-- New: OOF `0.861925` / Final `0.8529`
+- New: OOF `0.861925` / Final `0.8520`
 - Scheme: `boost_B+B_concern_soft` thr=`0.5` deploy=`soft:{'M1': 0.8, 'M2': 0.15, 'M4': 0.04999999999999996}`
 
 ```

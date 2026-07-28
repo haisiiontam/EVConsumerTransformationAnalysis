@@ -145,11 +145,11 @@ def write_competition_docs() -> None:
 
 | 任务 | 方案 | Final Acc |
 |------|------|-----------|
-| 任务一 | soft_vote（M6 0.55 + M1 0.35 + M3 0.10） | **0.8601** |
+| 任务一 | soft_vote（M6 0.55 + M1 0.35 + M3 0.10） | **0.8607** |
 | 任务二 | M（多数类恒预测 1） | **0.6498** |
-| 任务三 | boost_B+B_concern_soft（M1≈0.80, M2≈0.15, M4≈0.05, thr=0.5） | **0.8529** |
+| 任务三 | boost_B+B_concern_soft（M1≈0.80, M2≈0.15, M4≈0.05, thr=0.5） | **0.8520** |
 
-加权参考：`0.2*ACC1 + 0.4*ACC2 + 0.4*ACC3` = **0.7731**（内部 holdout，非正式排名）。
+加权参考：`0.2*ACC1 + 0.4*ACC2 + 0.4*ACC3` = **0.77286**（内部 holdout，非正式排名）。
 
 ## 目录对照赛方要求
 
@@ -253,7 +253,7 @@ python 任务三_支付意愿二分类/01_源代码/infer_task3.py --data dataSe
 
 - 目标：`ev_adoption_likelihood` 三分类（有序）。
 - 主指标：Accuracy；辅：Macro-F1、QWK、相邻错误率。
-- 锁定方案：`soft_vote`，内部 Final Acc = **0.8601**。
+- 锁定方案：`soft_vote`，内部 Final Acc = **0.8607**。
 
 ## 2. 特征与重要性
 
@@ -329,7 +329,7 @@ Top 方向性结论（摘要）：环保-技术亲和、知识/焦虑张力、�
 ## 1. 问题与指标
 
 - 由支付意愿相关连续分阈值化得到二分类（见源码 `build_target`）。
-- 锁定方案：`boost_B+B_concern_soft`，Final Acc = **0.8529**（OOF≈0.8619）。
+- 锁定方案：`boost_B+B_concern_soft`，Final Acc = **0.8520**（OOF≈0.8619）。
 
 ## 2. 特征与重要性
 
@@ -677,11 +677,11 @@ def build_paper_pack() -> None:
 
 | 任务 | 方案 | Acc |
 |------|------|-----|
-| 1 | soft_vote | 0.8601 |
+| 1 | soft_vote | 0.8607 |
 | 2 | majority M | 0.6498 |
-| 3 | boost_B+B_concern_soft | 0.8529 |
+| 3 | boost_B+B_concern_soft | 0.8520 |
 
-加权：0.2*0.8601 + 0.4*0.6498 + 0.4*0.8529 = **0.7731**
+加权：0.2*0.8607 + 0.4*0.6498 + 0.4*0.8520 = **0.77286**
 """,
     )
 

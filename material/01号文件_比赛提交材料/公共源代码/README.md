@@ -7,11 +7,11 @@
 
 | 任务 | 目标 | 锁定方案 | Final Acc |
 |------|------|----------|-----------|
-| 任务一 | `ev_adoption_likelihood`（Low/Medium/High） | `soft_vote` | **0.8601** |
+| 任务一 | `ev_adoption_likelihood`（Low/Medium/High） | `soft_vote` | **0.8607** |
 | 任务二 | `home_charging_available`（0/1） | `M` 多数类 | **0.6498** |
-| 任务三 | `range_anxiety_score > 5` → 1 | `boost_B+B_concern_soft` | **0.8529** |
+| 任务三 | `range_anxiety_score > 5` → 1 | `boost_B+B_concern_soft` | **0.8520** |
 
-内部加权分（非官方）：`0.2*ACC1 + 0.4*ACC2 + 0.4*ACC3` = **0.7731**  
+内部加权分（非官方）：`0.2*ACC1 + 0.4*ACC2 + 0.4*ACC3` = **0.77286**  
 详见 [`results/README.md`](results/README.md) 与 [`docs/README.md`](docs/README.md)。
 
 ## 2. 环境

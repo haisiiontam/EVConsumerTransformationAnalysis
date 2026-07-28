@@ -1,4 +1,4 @@
-﻿sample_index,true_label,pred_label
+﻿样本行号,真值类标签,预测类标签
 22257,High,High
 5475,Medium,Medium
 46292,Medium,High
@@ -189,7 +189,7 @@
 39826,High,High
 34543,Low,Low
 38209,High,High
-38640,Medium,High
+38640,Medium,Medium
 4399,High,Medium
 37629,High,High
 48496,Low,Medium
@@ -363,13 +363,13 @@
 15389,High,High
 10948,Medium,Medium
 32052,Medium,High
-22575,Medium,Medium
+22575,Medium,Low
 44809,Medium,Low
 16473,High,High
 1876,High,High
 1523,High,High
 35333,High,High
-45586,Medium,Medium
+45586,Medium,Low
 5840,Low,Low
 5065,High,High
 48157,Low,Low
@@ -794,7 +794,7 @@
 35715,High,High
 6252,Medium,High
 9603,Medium,High
-48299,Medium,Low
+48299,Medium,Medium
 9001,Medium,Medium
 30694,Low,Low
 33604,High,High
@@ -973,7 +973,7 @@
 5195,High,High
 46691,Low,Low
 16910,Low,Medium
-22373,Medium,Medium
+22373,Medium,High
 28062,High,High
 15398,High,High
 22499,Medium,Low
@@ -1169,7 +1169,7 @@
 46930,Low,Low
 32680,High,High
 23414,High,High
-3203,Medium,High
+3203,Medium,Medium
 49833,High,High
 30919,Low,Low
 11168,High,High
@@ -1254,7 +1254,7 @@
 29643,High,High
 35851,High,High
 41921,Medium,Medium
-30686,Low,Medium
+30686,Low,Low
 38160,Low,Medium
 16050,High,High
 40127,High,High
@@ -1296,7 +1296,7 @@
 16628,High,High
 45873,High,High
 38697,Low,Low
-5100,Low,Low
+5100,Low,Medium
 46672,Low,Medium
 4376,Medium,Medium
 5438,Low,Low
@@ -1755,7 +1755,7 @@
 41365,High,High
 21935,High,High
 41835,High,High
-21055,Low,Low
+21055,Low,Medium
 24633,High,High
 38472,High,High
 13662,High,High
@@ -1981,7 +1981,7 @@
 33729,High,High
 25589,Low,Low
 26810,Medium,High
-34569,High,Medium
+34569,High,High
 27123,High,High
 27439,Medium,Medium
 41534,Medium,Medium
@@ -2091,7 +2091,7 @@
 26295,Medium,High
 15827,High,High
 25104,High,High
-44967,Low,Medium
+44967,Low,Low
 27691,High,High
 25734,High,High
 14191,High,High
@@ -2166,7 +2166,7 @@
 43690,High,High
 3002,High,High
 9437,High,High
-26418,High,High
+26418,High,Medium
 5403,Medium,Medium
 5318,Medium,Medium
 6653,Medium,Medium
@@ -2213,7 +2213,7 @@
 6257,High,High
 15506,High,High
 1645,High,High
-11086,Medium,Low
+11086,Medium,Medium
 29301,High,High
 40595,Low,Medium
 17025,Low,Medium
@@ -2401,7 +2401,7 @@
 11230,Low,Medium
 40941,Medium,Medium
 12436,High,High
-40094,Low,Low
+40094,Low,Medium
 11853,Low,Medium
 47236,High,High
 10513,Low,Low
@@ -2566,7 +2566,7 @@
 29150,High,High
 20001,High,High
 17817,High,High
-1231,Medium,High
+1231,Medium,Medium
 5778,Low,Low
 41689,High,High
 18598,High,High
@@ -2631,7 +2631,7 @@
 43074,Low,Medium
 20369,High,High
 8305,High,High
-49524,Medium,Low
+49524,Medium,Medium
 14458,High,High
 10682,Medium,Medium
 34765,High,Medium
@@ -2672,7 +2672,7 @@
 39406,Low,Low
 42223,High,High
 41014,High,High
-49105,Medium,Low
+49105,Medium,Medium
 38049,Medium,Low
 44373,Low,Low
 42532,High,High
@@ -2798,7 +2798,7 @@
 34578,Low,Low
 3286,High,High
 49883,Medium,Medium
-16196,Medium,Medium
+16196,Medium,Low
 10575,Medium,Medium
 10500,Medium,Medium
 30505,High,High
@@ -2846,7 +2846,7 @@
 15092,High,High
 4065,High,High
 47745,High,High
-33120,Medium,Low
+33120,Medium,Medium
 22756,Medium,Low
 34720,High,High
 49020,Medium,High
@@ -3349,7 +3349,7 @@
 37831,High,High
 22803,High,High
 654,Medium,High
-17867,Medium,Medium
+17867,Medium,Low
 7937,High,High
 34228,High,High
 31090,High,High
@@ -3569,7 +3569,7 @@
 787,High,High
 22527,High,High
 21747,High,High
-31376,High,Medium
+31376,High,High
 3,Low,Medium
 48106,Medium,Medium
 1139,Medium,Medium
@@ -3636,7 +3636,7 @@
 2344,Medium,Medium
 4696,High,High
 15051,Medium,High
-18891,High,Medium
+18891,High,High
 3224,Medium,Medium
 13749,Low,Low
 45183,High,High
@@ -4148,7 +4148,7 @@
 22331,Low,Low
 3116,High,High
 2360,High,High
-1490,Medium,Medium
+1490,Medium,High
 41281,High,High
 43101,High,High
 29696,Medium,Medium
@@ -4660,7 +4660,7 @@
 24021,Medium,Medium
 3880,Low,Low
 48377,High,High
-5295,Low,Medium
+5295,Low,Low
 47410,High,High
 26988,High,High
 45945,High,High
@@ -4686,7 +4686,7 @@
 17801,High,High
 11797,Medium,Medium
 8862,Low,Low
-21093,Low,Medium
+21093,Low,Low
 48898,High,High
 2033,Low,Low
 23392,Medium,High
@@ -4708,7 +4708,7 @@
 9264,High,High
 27917,Medium,Medium
 27634,High,High
-47913,High,High
+47913,High,Medium
 10625,Medium,High
 29079,Medium,High
 18867,High,High
@@ -5049,7 +5049,7 @@
 26535,High,High
 22035,High,Medium
 42007,Low,Low
-26408,Low,Medium
+26408,Low,Low
 11510,High,High
 40253,High,High
 10060,High,High
@@ -5086,7 +5086,7 @@
 18318,High,High
 44543,High,High
 29410,Low,Low
-26294,Medium,Medium
+26294,Medium,High
 11627,High,High
 40674,Medium,Medium
 41319,High,High
@@ -5547,7 +5547,7 @@
 14886,High,High
 13629,High,High
 42556,High,High
-7441,High,Medium
+7441,High,High
 33170,High,High
 39695,High,High
 11727,High,High
@@ -5971,7 +5971,7 @@
 22867,High,High
 48462,High,High
 1385,High,High
-9205,Low,Medium
+9205,Low,Low
 8039,High,High
 19962,High,High
 45734,Medium,Medium
@@ -6049,7 +6049,7 @@
 34870,Low,Low
 3891,High,Medium
 41434,High,High
-46783,Medium,Low
+46783,Medium,Medium
 46673,High,Medium
 22423,High,High
 42552,High,High
@@ -6123,7 +6123,7 @@
 49757,Low,Low
 31126,High,High
 543,High,High
-23518,High,Medium
+23518,High,High
 30705,High,High
 23792,High,High
 14872,High,High
@@ -6409,7 +6409,7 @@
 14129,Medium,Medium
 11016,Low,Low
 27930,Medium,High
-37550,Low,Medium
+37550,Low,Low
 25823,High,High
 15377,Low,Low
 21393,Medium,High
@@ -6706,7 +6706,7 @@
 42134,Medium,Medium
 20047,High,High
 1644,Medium,High
-3187,High,High
+3187,High,Medium
 19026,Low,Low
 255,High,High
 37117,High,High
@@ -6963,7 +6963,7 @@
 12962,High,High
 17864,Medium,Medium
 42461,High,High
-48514,High,High
+48514,High,Medium
 4887,High,High
 35849,Medium,Low
 2839,High,High
@@ -6990,7 +6990,7 @@
 23064,High,High
 35059,Low,Medium
 14209,Medium,High
-41663,Medium,Low
+41663,Medium,Medium
 27696,Low,Low
 7032,Low,Low
 26900,Medium,Medium
@@ -7007,7 +7007,7 @@
 44964,High,High
 17316,Low,Low
 45775,High,High
-42965,Medium,Medium
+42965,Medium,Low
 39524,High,High
 18662,Medium,Medium
 37772,High,High
@@ -7235,7 +7235,7 @@
 38461,High,High
 42290,High,High
 21733,High,High
-33999,High,High
+33999,High,Medium
 16900,Low,Low
 16834,High,High
 11873,Low,Low
@@ -7684,7 +7684,7 @@
 5114,High,High
 40775,High,High
 12365,Low,Low
-13819,High,Medium
+13819,High,High
 42601,High,High
 44555,High,High
 4329,Low,Low
@@ -7866,7 +7866,7 @@
 39710,Medium,High
 30286,High,Medium
 44105,High,High
-41317,Medium,Medium
+41317,Medium,High
 7015,High,High
 42299,High,High
 26822,Low,Low
@@ -7975,7 +7975,7 @@
 23780,High,High
 8373,High,High
 14250,High,High
-37338,Medium,Medium
+37338,Medium,High
 14768,Medium,Medium
 48658,Low,Low
 42059,Low,Low
@@ -8010,7 +8010,7 @@
 2662,Medium,Medium
 5584,Medium,Low
 31470,Low,Low
-26495,High,Medium
+26495,High,High
 25860,High,High
 39700,Medium,Medium
 47662,High,High
@@ -8230,7 +8230,7 @@
 32253,High,High
 25650,Medium,Medium
 47704,High,High
-19755,High,High
+19755,High,Medium
 28392,High,High
 44059,Medium,Medium
 27790,High,High
@@ -8346,7 +8346,7 @@
 12932,High,High
 44089,Low,Low
 47219,High,High
-31228,Medium,Low
+31228,Medium,Medium
 42246,Medium,Low
 3576,High,High
 17303,High,High
@@ -8369,7 +8369,7 @@
 35248,High,High
 19904,High,High
 37385,Low,Medium
-41543,Medium,Medium
+41543,Medium,Low
 47046,High,High
 36438,Medium,High
 2224,High,High
@@ -8423,7 +8423,7 @@
 23,High,High
 19,High,High
 25979,High,High
-47493,High,High
+47493,High,Medium
 34738,High,High
 8316,High,High
 43002,High,High
@@ -8437,7 +8437,7 @@
 7931,High,Medium
 34075,High,High
 8536,High,High
-45969,Medium,Low
+45969,Medium,Medium
 44544,High,High
 24713,High,High
 8951,High,High
@@ -8816,7 +8816,7 @@
 9549,High,High
 1453,High,High
 48629,High,High
-1330,High,High
+1330,High,Medium
 8239,Medium,Medium
 20696,High,High
 8573,Low,Low
@@ -9300,7 +9300,7 @@
 2776,High,High
 17067,High,High
 42695,High,High
-31979,Low,Medium
+31979,Low,Low
 9131,High,High
 40394,High,High
 21812,Low,Medium
@@ -9422,7 +9422,7 @@
 44602,Medium,Medium
 39250,High,High
 28468,Medium,Medium
-7736,High,Medium
+7736,High,High
 43550,High,High
 6691,High,High
 41386,High,High
@@ -9705,7 +9705,7 @@
 12025,High,High
 47507,Low,Low
 29314,Medium,Medium
-38539,Medium,Low
+38539,Medium,Medium
 11750,Medium,Medium
 23835,High,High
 60,Medium,Medium
@@ -9879,7 +9879,7 @@
 1882,High,High
 13390,Low,Low
 45106,High,High
-45218,Medium,Medium
+45218,Medium,Low
 31963,Medium,High
 6405,Medium,Medium
 23843,Low,Medium

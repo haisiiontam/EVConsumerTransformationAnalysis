@@ -7,7 +7,7 @@
 ## Locked final model
 - Name: soft_vote
 - OOF Accuracy: 0.858725
-- Final validation Accuracy: 0.8601
+- Final validation Accuracy: 0.8607
 - Multi-seed mean±std: 0.8563000000000001 ± 0.0002474873734152
 
 ## Formal vs paper-only modules

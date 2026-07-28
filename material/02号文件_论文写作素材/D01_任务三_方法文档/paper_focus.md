@@ -1,7 +1,7 @@
 # 任务三论文写作重点（里程焦虑二分类）
 
 > 对应正式锁定：`boost_B+B_concern_soft`  
-> OOF Acc ≈ **0.8619**，Final Acc ≈ **0.8529**，阈值 **0.5**，特征 22 维（B + battery concern 机制组）  
+> OOF Acc ≈ **0.8619**，Final Acc ≈ **0.8520**，阈值 **0.5**，特征 22 维（B + battery concern 机制组）  
 > 加权分角色：ACC3 权重 0.4；本任务宜写「协议干净 + 结构创新 + 诚实消融」，不必堆花哨模型。
 
 ---
@@ -92,7 +92,7 @@
 | 多数类基线 | ≈ 0.5079 |
 | 锁定方案 | `boost_B+B_concern_soft`（约 M1 0.80 / M2 0.15 / M4 0.05） |
 | OOF Accuracy | ≈ **0.8619** |
-| Final Accuracy | ≈ **0.8529** |
+| Final Accuracy | ≈ **0.8520** |
 | 阈值 | 0.5 |
 | 特征数 | 22 |
 

@@ -104,7 +104,7 @@ def export_task1(out_dir: Path, data: Path) -> None:
             "M3_reg_soft": "task1_m3_regressor.cbm",
             "M6_ord_logit": "task1_m6_ord_logit.joblib",
         },
-        "final_holdout_accuracy": 0.8601,
+        "final_holdout_accuracy": 0.8607,
         "note": "预测时按权重融合 M6/M1/M3 概率；见 infer_task1.py",
     }
     (out_dir / "task1_model_bundle.json").write_text(
@@ -183,7 +183,7 @@ def export_task3(out_dir: Path, data: Path) -> None:
             "M2": "task3_m2_regressor.cbm",
             "M2_prep": "task3_m2_prep_state.joblib",
         },
-        "final_holdout_accuracy": 0.8529,
+        "final_holdout_accuracy": 0.8520,
         "deploy_note": "完整 soft 融合需 M1/M2 概率加权后 threshold；仅用 M1+0.5 亦接近。",
     }
     (out_dir / "task3_model_bundle.json").write_text(

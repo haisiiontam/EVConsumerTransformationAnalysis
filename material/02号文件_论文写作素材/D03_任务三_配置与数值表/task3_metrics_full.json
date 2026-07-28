@@ -1,6 +1,6 @@
 {
   "task_name": "task3",
-  "accuracy": 0.8529,
+  "accuracy": 0.852,
   "oof_accuracy": 0.861925,
   "threshold": 0.5,
   "selected_configuration": "boost_B+B_concern_soft",
@@ -69,7 +69,7 @@
     "previous_oof_accuracy": 0.86185,
     "previous_final_accuracy": 0.8528,
     "mode": "boost_continue",
-    "accuracy": 0.8529,
+    "accuracy": 0.852,
     "balanced_accuracy": 0.8522042442675389,
     "precision_0": 0.8282387190684134,
     "recall_0": 0.8962394172081118,
@@ -89,7 +89,7 @@
   "boost": {
     "previous_final": 0.8528,
     "previous_oof": 0.86185,
-    "new_final": 0.8529,
+    "new_final": 0.8520,
     "new_oof": 0.861925,
     "top_candidates": [
       {

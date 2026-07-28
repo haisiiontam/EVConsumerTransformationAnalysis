@@ -1,7 +1,13 @@
 {
-  "task1_final_accuracy": 0.8601,
+  "task1_final_accuracy": 0.8607,
   "task2_final_accuracy": 0.6498,
-  "task3_final_accuracy": 0.8529,
-  "weighted_score": 0.7731,
-  "formula": "0.2*ACC1 + 0.4*ACC2 + 0.4*ACC3"
+  "task3_final_accuracy": 0.8520,
+  "weighted_score": 0.77286,
+  "formula": "0.2*ACC1 + 0.4*ACC2 + 0.4*ACC3",
+  "correct_counts": {
+    "task1": 8607,
+    "task2": 6498,
+    "task3": 8520
+  },
+  "note": "与提交包模型+infer 可复现 Acc 对齐"
 }

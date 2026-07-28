@@ -60,6 +60,6 @@
     "M2": "task3_m2_regressor.cbm",
     "M2_prep": "task3_m2_prep_state.joblib"
   },
-  "final_holdout_accuracy": 0.8529,
+  "final_holdout_accuracy": 0.8520,
   "deploy_note": "完整 soft 融合需 M1/M2 概率加权后 threshold；仅用 M1+0.5 亦接近。"
 }

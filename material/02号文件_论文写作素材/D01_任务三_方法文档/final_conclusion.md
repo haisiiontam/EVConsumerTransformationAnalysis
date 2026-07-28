@@ -6,7 +6,7 @@
 - **特征**：B + battery-concern 机制组（22 维）
 - **软权重**：M1 CatBoost 分类 ≈0.80，M2 回归分支 ≈0.15，M4 LightGBM ≈0.05
 - **阈值**：0.5  
-- **OOF Acc ≈ 0.8619**，**Final Acc = 0.8529**
+- **OOF Acc ≈ 0.8619**，**Final Acc = 0.8520**
 
 ## 不采用
 

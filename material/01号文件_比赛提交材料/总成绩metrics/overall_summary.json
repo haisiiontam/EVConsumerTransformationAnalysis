@@ -1,20 +1,20 @@
 {
-  "ACC1": 0.8601,
+  "ACC1": 0.8607,
   "ACC2": 0.6498,
-  "ACC3": 0.8529,
-  "weighted_score": 0.7731,
-  "weighted_score_exact": 0.7731000000000001,
+  "ACC3": 0.8520,
+  "weighted_score": 0.77286,
+  "weighted_score_exact": 0.7728600000000001,
   "formula": "0.2*ACC1 + 0.4*ACC2 + 0.4*ACC3",
   "n_final_validation": 10000,
   "correct_counts": {
-    "task1": 8601,
+    "task1": 8607,
     "task2": 6498,
-    "task3": 8529
+    "task3": 8520
   },
   "schemes": {
     "task1": "soft_vote",
     "task2": "M_majority",
     "task3": "boost_B+B_concern_soft"
   },
-  "note": "内部 final_validation 由 predictions.csv 重算；非官方测试集成绩"
+  "note": "内部 final_validation 由提交模型+infer 在冻结验证集上重算；与 02_训练好的模型 可复现一致；非官方测试集成绩"
 }

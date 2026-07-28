@@ -20,7 +20,7 @@
 | 项 | 续训前 | 续训后 |
 |---|---|---|
 | OOF | 0.86185 | **0.861925** |
-| Final | 0.8528 | **0.8529** |
+| Final | 0.8528 | **0.8520** |
 | 方案 | M1@0.5 | `boost_B+B_concern_soft`（M1 0.80 / M2 0.15 / M4 0.05）@0.5 |
 
 详见 `outputs/task3/diagnostics/boost_continue/`。增益很小；GAM/TabNet 仍非优先。
