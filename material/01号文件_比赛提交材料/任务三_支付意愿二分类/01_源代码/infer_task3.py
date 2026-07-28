@@ -15,8 +15,8 @@ from catboost import CatBoostClassifier, CatBoostRegressor
 def _add_src_path() -> None:
     here = Path(__file__).resolve()
     candidates = [
-        here.parents[1] / "00_公共源代码",
-        here.parents[2] / "00_公共源代码",
+        here.parents[1] / "公共源代码",
+        here.parents[2] / "公共源代码",
         here.parents[2],
         here.parents[3],
         Path.cwd(),

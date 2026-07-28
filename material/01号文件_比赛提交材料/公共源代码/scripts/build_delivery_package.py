@@ -95,7 +95,7 @@ def copy_source() -> None:
     for name in ["src", "scripts", "main.py", "requirements.txt", "pyproject.toml", "README.md"]:
         src = ROOT / name
         if src.exists():
-            _copy(src, COMP / "00_公共源代码" / name)
+            _copy(src, COMP / "公共源代码" / name)
 
     # 任务级推理脚本（若已生成）
     infer_dir = ROOT / "delivery_staging" / "infer_scripts"
@@ -121,9 +121,9 @@ def copy_source() -> None:
 
 完整可复现代码位于交付包根目录：
 
-- `../00_公共源代码/src/` — 三任务实现
-- `../00_公共源代码/main.py` — 入口
-- `../00_公共源代码/scripts/` — 辅助脚本
+- `../公共源代码/src/` — 三任务实现
+- `../公共源代码/main.py` — 入口
+- `../公共源代码/scripts/` — 辅助脚本
 
 本目录另附 `infer_task*.py`（若存在）用于加载本任务「训练好的模型」做推理。
 
@@ -157,7 +157,7 @@ def write_competition_docs() -> None:
 
 | 赛方要求 | 本包位置 |
 |----------|----------|
-| 模型代码 | `00_公共源代码/` + 各任务 `01_源代码/` |
+| 模型代码 | `公共源代码/` + 各任务 `01_源代码/` |
 | 训练好的模型文件 | 各任务 `02_训练好的模型/` |
 | 预测结果 CSV（行号/真值/预测） | 各任务 `03_预测结果CSV/` |
 | 建模报告（重要性/选型/调参） | 各任务 `04_建模报告.md` |
@@ -384,8 +384,8 @@ from catboost import CatBoostClassifier, CatBoostRegressor
 def _add_src_path() -> None:
     here = Path(__file__).resolve()
     candidates = [
-        here.parents[1] / "00_公共源代码",  # 任务目录旁
-        here.parents[2] / "00_公共源代码",  # 比赛提交材料根
+        here.parents[1] / "公共源代码",  # 任务目录旁
+        here.parents[2] / "公共源代码",  # 比赛提交材料根
         here.parents[2],
         here.parents[3],
         Path.cwd(),
@@ -486,8 +486,8 @@ import pandas as pd
 def _add_src_path() -> None:
     here = Path(__file__).resolve()
     candidates = [
-        here.parents[1] / "00_公共源代码",
-        here.parents[2] / "00_公共源代码",
+        here.parents[1] / "公共源代码",
+        here.parents[2] / "公共源代码",
         here.parents[2],
         here.parents[3],
         Path.cwd(),
@@ -543,8 +543,8 @@ from catboost import CatBoostClassifier, CatBoostRegressor
 def _add_src_path() -> None:
     here = Path(__file__).resolve()
     candidates = [
-        here.parents[1] / "00_公共源代码",
-        here.parents[2] / "00_公共源代码",
+        here.parents[1] / "公共源代码",
+        here.parents[2] / "公共源代码",
         here.parents[2],
         here.parents[3],
         Path.cwd(),
